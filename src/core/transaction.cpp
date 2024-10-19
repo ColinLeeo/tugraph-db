@@ -1092,6 +1092,7 @@ Transaction::GetEdgeFields(const EIT& it) {
     std::vector<std::pair<std::string, FieldData>> values;
     for (size_t i = 0; i < schema->GetNumFields(); i++) {
         auto fe = schema->GetFieldExtractor(i);
+        if (fe->IsDeleted()) continue;
         values.emplace_back(fe->Name(), GetField(schema, prop, i, blob_manager_, *txn_));
     }
     return values;

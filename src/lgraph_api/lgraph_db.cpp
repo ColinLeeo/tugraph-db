@@ -29,11 +29,11 @@ bool ShouldKillThisTask(ThreadContextPtr ctx) {
     return lgraph::TaskTracker::ShouldKillTask((lgraph::TaskTracker::ThreadContext*)ctx);
 }
 
-#define THROW_IF_RO()                                        \
-    if (read_only_)                                          \
-        THROW_CODE(WriteNotAllowed,                          \
-            "Write transaction is not allowed in read-only " \
-            "DB.");
+#define THROW_IF_RO()                                               \
+    if (read_only_)                                                 \
+        THROW_CODE(WriteNotAllowed,                                 \
+                   "Write transaction is not allowed in read-only " \
+                   "DB.");
 #define THROW_IF_INVALID() \
     if (!db_) THROW_CODE(InvalidGraphDB);
 
@@ -126,28 +126,25 @@ bool GraphDB::AlterLabelModEdgeConstraints(
 }
 
 bool GraphDB::AlterVertexLabelDelFields(const std::string& label,
-                                        const std::vector<std::string>& del_fields,
-                                        size_t* n_modified) {
+                                        const std::vector<std::string>& del_fields) {
     THROW_IF_INVALID();
     THROW_IF_RO();
-    return db_->AlterLabelDelFields(label, del_fields, true, n_modified);
+    return db_->AlterLabelDelFields(label, del_fields, true);
 }
 
 bool GraphDB::AlterVertexLabelAddFields(const std::string& label,
                                         const std::vector<FieldSpec>& add_fields,
-                                        const std::vector<FieldData>& default_values,
-                                        size_t* n_modified) {
+                                        const std::vector<FieldData>& default_values) {
     THROW_IF_INVALID();
     THROW_IF_RO();
-    return db_->AlterLabelAddFields(label, add_fields, default_values, true, n_modified);
+    return db_->AlterLabelAddFields(label, add_fields, default_values, true);
 }
 
 bool GraphDB::AlterVertexLabelModFields(const std::string& label,
-                                        const std::vector<FieldSpec>& mod_fields,
-                                        size_t* n_modified) {
+                                        const std::vector<FieldSpec>& mod_fields) {
     THROW_IF_INVALID();
     THROW_IF_RO();
-    return db_->AlterLabelModFields(label, mod_fields, true, n_modified);
+    return db_->AlterLabelModFields(label, mod_fields, true);
 }
 
 bool GraphDB::AddEdgeLabel(const std::string& label, const std::vector<FieldSpec>& fds,
@@ -164,28 +161,25 @@ bool GraphDB::DeleteEdgeLabel(const std::string& label, size_t* n_modified) {
 }
 
 bool GraphDB::AlterEdgeLabelDelFields(const std::string& label,
-                                      const std::vector<std::string>& del_fields,
-                                      size_t* n_modified) {
+                                      const std::vector<std::string>& del_fields) {
     THROW_IF_INVALID();
     THROW_IF_RO();
-    return db_->AlterLabelDelFields(label, del_fields, false, n_modified);
+    return db_->AlterLabelDelFields(label, del_fields, false);
 }
 
 bool GraphDB::AlterEdgeLabelAddFields(const std::string& label,
                                       const std::vector<FieldSpec>& add_fields,
-                                      const std::vector<FieldData>& default_values,
-                                      size_t* n_modified) {
+                                      const std::vector<FieldData>& default_values) {
     THROW_IF_INVALID();
     THROW_IF_RO();
-    return db_->AlterLabelAddFields(label, add_fields, default_values, false, n_modified);
+    return db_->AlterLabelAddFields(label, add_fields, default_values, false);
 }
 
 bool GraphDB::AlterEdgeLabelModFields(const std::string& label,
-                                      const std::vector<FieldSpec>& mod_fields,
-                                      size_t* n_modified) {
+                                      const std::vector<FieldSpec>& mod_fields) {
     THROW_IF_INVALID();
     THROW_IF_RO();
-    return db_->AlterLabelModFields(label, mod_fields, false, n_modified);
+    return db_->AlterLabelModFields(label, mod_fields, false);
 }
 
 bool GraphDB::AddVertexIndex(const std::string& label, const std::string& field, IndexType type) {
@@ -210,12 +204,11 @@ bool GraphDB::AddVertexCompositeIndex(const std::string& label,
 
 bool GraphDB::AddVectorIndex(bool is_vertex, const std::string& label, const std::string& field,
                              const std::string& index_type, int vec_dimension,
-                             const std::string& distance_type,
-                             std::vector<int>& index_spec) {
+                             const std::string& distance_type, std::vector<int>& index_spec) {
     THROW_IF_INVALID();
     THROW_IF_RO();
-    return db_->AddVectorIndex(is_vertex, label, field, index_type, vec_dimension,
-                               distance_type, index_spec);
+    return db_->AddVectorIndex(is_vertex, label, field, index_type, vec_dimension, distance_type,
+                               index_spec);
 }
 
 bool GraphDB::IsVertexIndexed(const std::string& label, const std::string& field) {
@@ -248,8 +241,8 @@ bool GraphDB::IsVertexCompositeIndexed(const std::string& label,
     return db_->IsVertexCompositeIndexed(label, field);
 }
 
-bool GraphDB::DeleteVectorIndex(
-    bool is_vertex, const std::string& label, const std::string& field) {
+bool GraphDB::DeleteVectorIndex(bool is_vertex, const std::string& label,
+                                const std::string& field) {
     THROW_IF_INVALID();
     THROW_IF_RO();
     return db_->DeleteVectorIndex(is_vertex, label, field);

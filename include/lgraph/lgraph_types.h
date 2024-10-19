@@ -1237,7 +1237,7 @@ struct FieldSpec {
     /** @brief  is set default value? */
     bool set_default_value;
 
-    FieldSpec() : name(), type(FieldType::NUL), optional(false) {}
+    FieldSpec() : name(), type(FieldType::NUL), optional(false), deleted(false), id(0) {}
 
     /**
      * @brief   Constructor
@@ -1248,11 +1248,11 @@ struct FieldSpec {
      * @param   id  Field id
      */
     FieldSpec(const std::string& n, FieldType t, bool nu)
-        : name(n), type(t), optional(nu), id(0) {}
+        : name(n), type(t), optional(nu), deleted(false), id(0) {}
     FieldSpec(const std::string& n, FieldType t, bool nu, uint16_t id)
-        : name(n), type(t), optional(nu), id(id) {}
+        : name(n), type(t), optional(nu), deleted(false), id(id) {}
     FieldSpec(std::string&& n, FieldType t, bool nu, uint16_t id)
-        : name(std::move(n)), type(t), optional(nu), id(id) {}
+        : name(std::move(n)), type(t), optional(nu), deleted(false), id(id) {}
     FieldSpec(const std::string& n, FieldType t, bool nu, uint16_t id, const FieldData& iv,
               const FieldData& dv)
         : name(n),

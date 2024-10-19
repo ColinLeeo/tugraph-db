@@ -62,6 +62,8 @@ class FieldExtractor {
         edge_index_.reset(rhs.edge_index_ ? new EdgeIndex(*rhs.edge_index_) : nullptr);
         fulltext_indexed_ = rhs.fulltext_indexed_;
         vector_index_ = rhs.vector_index_;
+        nullarray_offset_ = rhs.nullarray_offset_;
+        count_offset_ = rhs.count_offset_;
     }
 
     FieldExtractor& operator=(const FieldExtractor& rhs) {
@@ -72,6 +74,8 @@ class FieldExtractor {
         edge_index_.reset(rhs.edge_index_ ? new EdgeIndex(*rhs.edge_index_) : nullptr);
         fulltext_indexed_ = rhs.fulltext_indexed_;
         vector_index_ = rhs.vector_index_;
+        nullarray_offset_ = rhs.nullarray_offset_;
+        count_offset_ = rhs.count_offset_;
         return *this;
     }
 
@@ -85,6 +89,8 @@ class FieldExtractor {
         fulltext_indexed_ = rhs.fulltext_indexed_;
         vector_index_ = std::move(rhs.vector_index_);
         rhs.vector_index_ = nullptr;
+        count_offset_ = rhs.count_offset_;
+        nullarray_offset_ = rhs.nullarray_offset_;
     }
 
     FieldExtractor& operator=(FieldExtractor&& rhs) noexcept {
@@ -95,6 +101,8 @@ class FieldExtractor {
         edge_index_ = std::move(rhs.edge_index_);
         fulltext_indexed_ = rhs.fulltext_indexed_;
         vector_index_ = std::move(rhs.vector_index_);
+        nullarray_offset_ = rhs.nullarray_offset_;
+        count_offset_ = rhs.count_offset_;
         return *this;
     }
 
@@ -287,7 +295,7 @@ class FieldExtractor {
 
     bool IsFixedType() const { return field_data_helper::IsFixedLengthFieldType(def_.type); }
 
-    bool IsDeleted() const { return def_.deleted;}
+    bool IsDeleted() const { return def_.deleted; }
 
     /**
      * Print the string representation of the field. For digital types, it prints

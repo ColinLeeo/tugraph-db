@@ -496,6 +496,8 @@ Value Schema::CreateEmptyRecord(size_t size_hint) const {
     memset(ptr + offset, 0xFF, (num_fields + 7) / 8);
     offset += (num_fields + 7) / 8;
 
+    if (num_fields == 0) return v;
+
     // 6. Set fields' offset.
     DataOffset offset_begin = offset;
     DataOffset data_offset = offset + num_fields * sizeof(DataOffset);  // data area begin.
@@ -508,6 +510,7 @@ Value Schema::CreateEmptyRecord(size_t size_hint) const {
         ::lgraph::_detail::UnalignedSet<DataOffset>(offset_ptr, data_offset);
         offset_ptr += sizeof(DataOffset);
     }
+
     // the latest offset marks the end of the fixed-area.
     data_offset += fields_[num_fields - 1].IsFixedType() ? fields_[num_fields - 1].TypeSize()
                                                          : sizeof(DataOffset);
@@ -1043,19 +1046,10 @@ void Schema::SetSchema(bool is_vertex, size_t n_fields, const FieldSpec* fields,
     blob_fields_.clear();
     name_to_idx_.clear();
     fields_.reserve(n_fields);
-    
+
     for (size_t i = 0; i < n_fields; i++) {
         fields_.emplace_back(fields[i]);
-    }
-    std::sort(fields_.begin(), fields_.end(),
-              [](const _detail::FieldExtractor& a, const _detail::FieldExtractor& b) {
-                  return a.GetFieldId() < b.GetFieldId();
-              });
-
-    for (size_t i = 1; i < n_fields; i++) {
-        if (fields_[i].GetFieldId() == fields_[i - 1].GetFieldId()) {
-            throw FieldIdConflictException(fields_[i].Name(), fields_[i - 1].Name());
-        }
+        fields_[i].SetFieldId(i);
     }
     for (auto& f : fields_) {
         if (f.Type() == FieldType::NUL) throw FieldCannotBeNullTypeException(f.Name());
@@ -1109,7 +1103,8 @@ void Schema::DelFields(const std::vector<std::string>& del_fields) {
     // just do logical delettion.
     for (size_t del_id : del_ids) {
         fields_[del_id].MarkDeleted();
-        blob_fields_.erase(std::remove(blob_fields_.begin(), blob_fields_.end(), del_id), blob_fields_.end());
+        blob_fields_.erase(std::remove(blob_fields_.begin(), blob_fields_.end(), del_id),
+                           blob_fields_.end());
         name_to_idx_.erase(fields_[del_id].Name());
     }
 }
@@ -1128,6 +1123,7 @@ void Schema::AddFields(const std::vector<FieldSpec>& add_fields) {
         if (_F_UNLIKELY(name_to_idx_.find(f.name) != name_to_idx_.end()))
             throw FieldAlreadyExistsException(f.name);
         fields_.push_back(_detail::FieldExtractor(f, fields_.size()));
+        fields_.back().SetLabelInRecord(label_in_record_);
         name_to_idx_[f.name] = fields_.size() - 1;
     }
     lgraph::CheckValidFieldNum(fields_.size());
@@ -1140,10 +1136,19 @@ void Schema::ModFields(const std::vector<FieldSpec>& mod_fields) {
         auto it = name_to_idx_.find(f.name);
         if (_F_UNLIKELY(it == name_to_idx_.end())) throw FieldNotFoundException(f.name);
         size_t fid = it->second;
+        if (f.type == FieldType::NUL) {
+            throw FieldCannotBeNullTypeException(f.name);
+        }
         UnVertexIndex(fid);
         UnEdgeIndex(fid);
         auto& extractor = fields_[fid];
+
+        if (extractor.Type() == FieldType::BLOB && f.type != FieldType::BLOB) {
+            blob_fields_.erase(std::remove(blob_fields_.begin(), blob_fields_.end(), fid),
+                               blob_fields_.end());
+        }
         extractor = _detail::FieldExtractor(f, fid);
+        extractor.SetLabelInRecord(label_in_record_);
         mod_ids.push_back(fid);
     }
     auto composite_index_key = GetRelationalCompositeIndexKey(mod_ids);

@@ -57,10 +57,9 @@ class AccessControlledDB {
 
     bool DelPlugin(plugin::Type plugin_type, const std::string& token, const std::string& name);
 
-    bool CallPlugin(lgraph_api::Transaction* txn,
-                    plugin::Type plugin_type, const std::string& token, const std::string& name,
-                    const std::string& request, double timeout_seconds, bool in_process,
-                    std::string& output);
+    bool CallPlugin(lgraph_api::Transaction* txn, plugin::Type plugin_type,
+                    const std::string& token, const std::string& name, const std::string& request,
+                    double timeout_seconds, bool in_process, std::string& output);
 
     bool CallV2Plugin(lgraph_api::Transaction* txn, plugin::Type plugin_type,
                       const std::string& user, const std::string& name, const std::string& request,
@@ -91,23 +90,21 @@ class AccessControlledDB {
         const std::vector<std::pair<std::string, std::string>>& constraints);
 
     bool AlterLabelDelFields(const std::string& label, const std::vector<std::string>& del_fields,
-                             bool is_vertex, size_t* n_modified);
+                             bool is_vertex);
 
     bool AlterLabelAddFields(const std::string& label, const std::vector<FieldSpec>& add_fields,
-                             const std::vector<FieldData>& default_values, bool is_vertex,
-                             size_t* n_modified);
+                             const std::vector<FieldData>& default_values, bool is_vertex);
 
     bool AlterLabelModFields(const std::string& label, const std::vector<FieldSpec>& mod_fields,
-                             bool is_vertex, size_t* n_modified);
-    bool AddEdgeConstraints(
-        const std::string& label,
-        const std::vector<std::pair<std::string, std::string>>& constraints);
+                             bool is_vertex);
+    bool AddEdgeConstraints(const std::string& label,
+                            const std::vector<std::pair<std::string, std::string>>& constraints);
     bool ClearEdgeConstraints(const std::string& label);
 
     bool AddVertexIndex(const std::string& label, const std::string& field, IndexType type);
 
-    bool AddVertexCompositeIndex(const std::string& label,
-                                 const std::vector<std::string>& fields, CompositeIndexType type);
+    bool AddVertexCompositeIndex(const std::string& label, const std::vector<std::string>& fields,
+                                 CompositeIndexType type);
 
     bool AddEdgeIndex(const std::string& label, const std::string& field, IndexType type);
 
@@ -128,8 +125,7 @@ class AccessControlledDB {
 
     bool IsEdgeIndexed(const std::string& label, const std::string& field);
 
-    bool IsVertexCompositeIndexed(const std::string& label,
-                                  const std::vector<std::string>& fields);
+    bool IsVertexCompositeIndexed(const std::string& label, const std::vector<std::string>& fields);
 
     bool AddFullTextIndex(bool is_vertex, const std::string& label, const std::string& field);
 
@@ -140,10 +136,12 @@ class AccessControlledDB {
     std::vector<std::tuple<bool, std::string, std::string>> ListFullTextIndexes();
 
     std::vector<std::pair<int64_t, float>> QueryVertexByFullTextIndex(const std::string& label,
-                                                    const std::string& query, int top_n);
+                                                                      const std::string& query,
+                                                                      int top_n);
 
     std::vector<std::pair<EdgeUid, float>> QueryEdgeByFullTextIndex(const std::string& label,
-                                                  const std::string& query, int top_n);
+                                                                    const std::string& query,
+                                                                    int top_n);
     void RefreshCount();
 
     void WarmUp() const;
@@ -158,9 +156,7 @@ class AccessControlledDB {
         AccessControlledDB::enable_plugin = enable_plugin_;
     }
 
-    inline static bool GetEnablePlugin() {
-        return enable_plugin;
-    }
+    inline static bool GetEnablePlugin() { return enable_plugin; }
 
  private:
     inline void CheckReadAccess() const {
@@ -180,10 +176,12 @@ class AccessControlledDB {
     }
 
     inline void CheckLoadOrDeletePlugin() const {
-        if (!enable_plugin) THROW_CODE(PluginDisabled, "No permission to load or delete plugin, "
-                                       "please use correct config and restart server!\n"
-                                       "This function has security risks, please enable "
-                                       "it with caution!");
+        if (!enable_plugin)
+            THROW_CODE(PluginDisabled,
+                       "No permission to load or delete plugin, "
+                       "please use correct config and restart server!\n"
+                       "This function has security risks, please enable "
+                       "it with caution!");
     }
 };
 }  // namespace lgraph

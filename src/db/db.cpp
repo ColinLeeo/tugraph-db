@@ -18,8 +18,7 @@
 bool lgraph::AccessControlledDB::enable_plugin = true;
 
 lgraph::AccessControlledDB::AccessControlledDB(ScopedRef<LightningGraph>&& ref,
-                                               AccessLevel access_level,
-                                               const std::string& user)
+                                               AccessLevel access_level, const std::string& user)
     : graph_ref_(std::move(ref)),
       graph_(graph_ref_.Get()),
       graph_ref_lock_(graph_->GetReloadLock(), GetMyThreadId()),
@@ -78,23 +77,15 @@ bool lgraph::AccessControlledDB::DelPlugin(plugin::Type plugin_type, const std::
     return graph_->GetPluginManager()->DelPlugin(plugin_type, user, name);
 }
 
-bool lgraph::AccessControlledDB::CallPlugin(lgraph_api::Transaction* txn,
-                                            plugin::Type plugin_type, const std::string& user,
-                                            const std::string& name, const std::string& request,
-                                            double timeout_seconds, bool in_process,
-                                            std::string& output) {
+bool lgraph::AccessControlledDB::CallPlugin(lgraph_api::Transaction* txn, plugin::Type plugin_type,
+                                            const std::string& user, const std::string& name,
+                                            const std::string& request, double timeout_seconds,
+                                            bool in_process, std::string& output) {
     auto pm = graph_->GetPluginManager();
     bool is_readonly = pm->IsReadOnlyPlugin(plugin_type, user, name);
     if (access_level_ < AccessLevel::WRITE && !is_readonly)
         THROW_CODE(Unauthorized, "Write permission needed to call this plugin.");
-    return pm->Call(txn,
-                    plugin_type,
-                    user,
-                    this,
-                    name,
-                    request,
-                    timeout_seconds,
-                    in_process,
+    return pm->Call(txn, plugin_type, user, this, name, request, timeout_seconds, in_process,
                     output);
 }
 
@@ -107,14 +98,7 @@ bool lgraph::AccessControlledDB::CallV2Plugin(lgraph_api::Transaction* txn,
     bool is_readonly = pm->IsReadOnlyPlugin(plugin_type, user, name);
     if (access_level_ < AccessLevel::WRITE && !is_readonly)
         THROW_CODE(Unauthorized, "Write permission needed to call this plugin.");
-    return pm->CallV2(txn,
-                      plugin_type,
-                      user,
-                      this,
-                      name,
-                      request,
-                      timeout_seconds,
-                      in_process,
+    return pm->CallV2(txn, plugin_type, user, this, name, request, timeout_seconds, in_process,
                       output);
 }
 
@@ -174,29 +158,28 @@ bool lgraph::AccessControlledDB::AlterLabelModEdgeConstraints(
 
 bool lgraph::AccessControlledDB::AlterLabelDelFields(const std::string& label,
                                                      const std::vector<std::string>& del_fields,
-                                                     bool is_vertex, size_t* n_modified) {
+                                                     bool is_vertex) {
     CheckFullAccess();
-    return graph_->AlterLabelDelFields(label, del_fields, is_vertex, n_modified);
+    return graph_->AlterLabelDelFields(label, del_fields, is_vertex);
 }
 
 bool lgraph::AccessControlledDB::AlterLabelAddFields(const std::string& label,
                                                      const std::vector<FieldSpec>& add_fields,
                                                      const std::vector<FieldData>& default_values,
-                                                     bool is_vertex, size_t* n_modified) {
+                                                     bool is_vertex) {
     CheckFullAccess();
-    return graph_->AlterLabelAddFields(label, add_fields, default_values, is_vertex, n_modified);
+    return graph_->AlterLabelAddFields(label, add_fields, default_values, is_vertex);
 }
 
 bool lgraph::AccessControlledDB::AlterLabelModFields(const std::string& label,
                                                      const std::vector<FieldSpec>& mod_fields,
-                                                     bool is_vertex, size_t* n_modified) {
+                                                     bool is_vertex) {
     CheckFullAccess();
-    return graph_->AlterLabelModFields(label, mod_fields, is_vertex, n_modified);
+    return graph_->AlterLabelModFields(label, mod_fields, is_vertex);
 }
 
 bool lgraph::AccessControlledDB::AddEdgeConstraints(
-    const std::string& label,
-    const std::vector<std::pair<std::string, std::string>>& constraints) {
+    const std::string& label, const std::vector<std::pair<std::string, std::string>>& constraints) {
     CheckFullAccess();
     return graph_->AddEdgeConstraints(label, constraints);
 }
@@ -210,7 +193,6 @@ void lgraph::AccessControlledDB::RefreshCount() {
     CheckFullAccess();
     graph_->RefreshCount();
 }
-
 
 bool lgraph::AccessControlledDB::AddVertexIndex(const std::string& label, const std::string& field,
                                                 IndexType type) {
@@ -226,19 +208,19 @@ bool lgraph::AccessControlledDB::AddVertexCompositeIndex(const std::string& labe
 }
 
 bool lgraph::AccessControlledDB::AddEdgeIndex(const std::string& label, const std::string& field,
-                                          IndexType type) {
+                                              IndexType type) {
     CheckFullAccess();
     return graph_->BlockingAddIndex(label, field, type, false);
 }
 
 bool lgraph::AccessControlledDB::AddVectorIndex(bool is_vertex, const std::string& label,
                                                 const std::string& field,
-                                                const std::string& index_type,
-                                                int vec_dimension, const std::string& distance_type,
+                                                const std::string& index_type, int vec_dimension,
+                                                const std::string& distance_type,
                                                 std::vector<int>& index_spec) {
     CheckFullAccess();
     return graph_->BlockingAddVectorIndex(is_vertex, label, field, index_type, vec_dimension,
-                                            distance_type, index_spec);
+                                          distance_type, index_spec);
 }
 
 bool lgraph::AccessControlledDB::AddFullTextIndex(bool is_vertex, const std::string& label,
@@ -290,8 +272,8 @@ bool lgraph::AccessControlledDB::DeleteEdgeIndex(const std::string& label,
     return graph_->DeleteIndex(label, field, false);
 }
 
-bool lgraph::AccessControlledDB::DeleteVertexCompositeIndex(const std::string& label,
-                                 const std::vector<std::string>& fields) {
+bool lgraph::AccessControlledDB::DeleteVertexCompositeIndex(
+    const std::string& label, const std::vector<std::string>& fields) {
     CheckFullAccess();
     return graph_->DeleteCompositeIndex(label, fields, true);
 }
@@ -308,14 +290,13 @@ bool lgraph::AccessControlledDB::IsVertexIndexed(const std::string& label,
     return graph_->IsIndexed(label, field, true);
 }
 
-bool lgraph::AccessControlledDB::IsEdgeIndexed(const std::string& label,
-                                               const std::string& field) {
+bool lgraph::AccessControlledDB::IsEdgeIndexed(const std::string& label, const std::string& field) {
     CheckReadAccess();
     return graph_->IsIndexed(label, field, false);
 }
 
 bool lgraph::AccessControlledDB::IsVertexCompositeIndexed(const std::string& label,
-                                 const std::vector<std::string>& fields) {
+                                                          const std::vector<std::string>& fields) {
     CheckReadAccess();
     return graph_->IsCompositeIndexed(label, fields);
 }

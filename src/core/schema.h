@@ -367,8 +367,10 @@ class Schema {
     typename std::enable_if<IS_FIELD_TYPE(FieldT), FieldData>::type GetField(
         const Value& record, const FieldT& field_name_or_num,
         const GetBlobByKeyFunc& get_blob) const {
-        auto extractor = TryGetFieldExtractor(field_name_or_num);
+        const _detail::FieldExtractor* extractor = TryGetFieldExtractor(field_name_or_num);
         if (!extractor) return FieldData();
+        if (extractor->GetRecordCount(record) < extractor->GetFieldId() + 1)
+            return extractor->GetInitedValue();
         if (extractor->GetIsNull(record)) return FieldData();
         if (_F_UNLIKELY(extractor->Type() == FieldType::BLOB))
             return GetFieldDataFromBlobField(extractor, record, get_blob);

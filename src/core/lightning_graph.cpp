@@ -264,7 +264,7 @@ bool LightningGraph::AddLabel(const std::string& label, const std::vector<FieldS
     return AddLabel(label, fds.size(), fds.data(), is_vertex, options);
 }
 
-bool LightningGraph::DelLabel(const std::string& label, bool is_vertex) {
+bool LightningGraph::DelLabel(const std::string& label, bool is_vertex, size_t* n_modified) {
     LOG_INFO() << "Deleting " << (is_vertex ? "vertex" : "edge") << " label [" << label << "]";
     _HoldWriteLock(meta_lock_);
     size_t commit_size = 4096;
@@ -667,27 +667,10 @@ bool LightningGraph::AlterLabelDelFields(const std::string& label,
     del_fields.erase(std::unique(del_fields.begin(), del_fields.end()), del_fields.end());
     if (del_fields.empty()) THROW_CODE(InputError, "No fields specified.");
 
-    // get fids of the fields in new schema
-    std::vector<size_t> new_fids;
-    std::vector<size_t> old_field_pos;
-    std::vector<const _detail::FieldExtractor*> blob_deleted_fes;
-
     // make new schema
     auto modify_schema = [&](Schema* curr_schema) -> Schema {
         Schema new_schema(*curr_schema);
         new_schema.DelFields(del_fields);
-        size_t n_new_fields = new_schema.GetNumFields();
-        for (size_t i = 0; i < n_new_fields; i++) new_fids.push_back(i);
-        // setup auxiliary data
-        for (size_t i = 0; i < n_new_fields; i++)
-            old_field_pos.push_back(
-                curr_schema->GetFieldId(new_schema.GetFieldExtractor(i)->Name()));
-        for (auto& f : del_fields) {
-            auto* extractor = curr_schema->GetFieldExtractor(f);
-            if (extractor->Type() == FieldType::BLOB) {
-                blob_deleted_fes.push_back(extractor);
-            }
-        }
         return new_schema;
     };
 
@@ -748,6 +731,10 @@ bool LightningGraph::AlterLabelAddFields(const std::string& label,
                 THROW_CODE(InputError,
                            "Field [{}] is declared as non-optional but the default value is NULL.",
                            fs.name);
+            if (!checkTypeSuitable(fs.type, default_values[i].type) &&
+                !default_values[i].IsNull()) {
+                throw ParseFieldDataException(fs.name, default_values[i], fs.type);
+            }
         }
     }
 
@@ -770,8 +757,7 @@ bool LightningGraph::AlterLabelAddFields(const std::string& label,
 }
 
 bool LightningGraph::AlterLabelModFields(const std::string& label,
-                                         const std::vector<FieldSpec>& to_mod, bool is_vertex,
-                                        ) {
+                                         const std::vector<FieldSpec>& to_mod, bool is_vertex) {
     LOG_INFO() << FMA_FMT("Modifying fields {} in {} label [{}].", to_mod,
                           is_vertex ? "vertex" : "edge", label);
     _HoldReadLock(meta_lock_);
@@ -790,6 +776,10 @@ bool LightningGraph::AlterLabelModFields(const std::string& label,
         // check field types
         for (auto& f : to_mod) {
             auto* extractor = curr_schema->GetFieldExtractor(f.name);
+            if (extractor->Type() == f.type) {
+                continue;
+            }
+
             if (extractor->Type() == FieldType::BLOB && f.type != FieldType::BLOB) {
                 THROW_CODE(InputError,
                            "Field [{}] is of type BLOB, which cannot be converted to other types.",
@@ -800,6 +790,14 @@ bool LightningGraph::AlterLabelModFields(const std::string& label,
                            "Field [{}] has fulltext index, which cannot be converted to other "
                            "non-STRING types.",
                            f.name);
+            }
+            if (!((field_data_helper::IsIntegerType(extractor->Type()) &&
+                   field_data_helper::IsIntegerType(f.type)) ||
+                  (field_data_helper::IsFloatingType(extractor->Type()) &&
+                   field_data_helper::IsFloatingType(f.type)) ||
+                  f.type == FieldType::BLOB)) {
+                THROW_CODE(InputError,
+                           "Field type can only changed within integer type or floating type");
             }
         }
         Schema new_schema(*curr_schema);
@@ -831,6 +829,18 @@ bool LightningGraph::AlterLabelModFields(const std::string& label,
     };
 
     return _AlterLabel(is_vertex, label, alter_schema, delete_indexes);
+}
+
+bool LightningGraph::checkTypeSuitable(FieldType type, FieldType type2) const {
+    if (type == type2) return true;
+    switch (type) {
+    case FieldType::DATE:
+        if (type2 == FieldType::DATETIME) return true;
+        return false;
+    default:
+        return false;
+    }
+    return false;
 }
 
 /**
@@ -1967,9 +1977,8 @@ bool LightningGraph::BlockingAddIndex(const std::string& label, const std::strin
 }
 
 bool LightningGraph::BlockingAddVectorIndex(bool is_vertex, const std::string& label,
-                                            const std::string& field,
-                                            const std::string& index_type, int vec_dimension,
-                                            const std::string& distance_type,
+                                            const std::string& field, const std::string& index_type,
+                                            int vec_dimension, const std::string& distance_type,
                                             std::vector<int>& index_spec) {
     if (!is_vertex) {
         THROW_CODE(VectorIndexException, "Only vertex supports vector index");
@@ -1991,16 +2000,17 @@ bool LightningGraph::BlockingAddVectorIndex(bool is_vertex, const std::string& l
         THROW_CODE(VectorIndexException, "Only FLOAT_VECTOR type supports vector index");
     }
     std::unique_ptr<VectorIndex> vector_index;
-    bool success = index_manager_->AddVectorIndex(txn.GetTxn(), label, field, index_type,
-                               vec_dimension, distance_type, index_spec, vector_index);
+    bool success =
+        index_manager_->AddVectorIndex(txn.GetTxn(), label, field, index_type, vec_dimension,
+                                       distance_type, index_spec, vector_index);
     if (!success)
         THROW_CODE(VectorIndexException, "failed to add vector index {}-{}", label, field);
     schema->MarkVectorIndexed(extractor->GetFieldId(), vector_index.release());
     if (!schema->DetachProperty()) {
         THROW_CODE(VectorIndexException, "vector index only support detached model");
     }
-    LOG_INFO() << FMA_FMT("start building vertex vector index for {}:{} in detached model",
-                          label, field);
+    LOG_INFO() << FMA_FMT("start building vertex vector index for {}:{} in detached model", label,
+                          field);
     VectorIndex* index = extractor->GetVectorIndex();
     uint64_t count = 0;
     std::vector<std::vector<float>> floatvector;
@@ -2015,8 +2025,8 @@ bool LightningGraph::BlockingAddVectorIndex(bool is_vertex, const std::string& l
         auto vid = graph::KeyPacker::GetVidFromPropertyTableKey(kv_iter->GetKey());
         auto vector = (extractor->GetConstRef(prop)).AsType<std::vector<float>>();
         if (vector.size() != (size_t)dim) {
-            THROW_CODE(VectorIndexException,
-                       "vector size error, size:{}, dim:{}", vector.size(), dim);
+            THROW_CODE(VectorIndexException, "vector size error, size:{}, dim:{}", vector.size(),
+                       dim);
         }
         floatvector.emplace_back(std::move(vector));
         vids.emplace_back(vid);
@@ -2025,8 +2035,8 @@ bool LightningGraph::BlockingAddVectorIndex(bool is_vertex, const std::string& l
     index->Build();
     index->Add(floatvector, vids, count);
     LOG_INFO() << "index count: " << count;
-    LOG_INFO() << FMA_FMT("end building vertex vector index for {}:{} in detached model",
-                          label, field);
+    LOG_INFO() << FMA_FMT("end building vertex vector index for {}:{} in detached model", label,
+                          field);
     kv_iter.reset();
     txn.Commit();
     schema_.Assign(new_schema.release());
@@ -2550,8 +2560,8 @@ bool LightningGraph::DeleteCompositeIndex(const std::string& label,
     return false;
 }
 
-bool LightningGraph::DeleteVectorIndex(
-    bool is_vertex, const std::string& label, const std::string& field) {
+bool LightningGraph::DeleteVectorIndex(bool is_vertex, const std::string& label,
+                                       const std::string& field) {
     if (!is_vertex) {
         THROW_CODE(VectorIndexException, "Only vertex supports vector index");
     }

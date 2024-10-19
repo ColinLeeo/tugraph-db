@@ -1,15 +1,15 @@
 /**
-* Copyright 2022 AntGroup CO., Ltd.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * Copyright 2022 AntGroup CO., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
 #include "gtest/gtest.h"
@@ -19,7 +19,7 @@
 #include "core/data_type.h"
 using namespace lgraph_api;
 
-class TestAlterDetachedLabel : public TuGraphTest{};
+class TestAlterDetachedLabel : public TuGraphTest {};
 
 TEST_F(TestAlterDetachedLabel, edge_add_field) {
     std::string path = "./testdb";
@@ -63,9 +63,7 @@ TEST_F(TestAlterDetachedLabel, edge_add_field) {
         txn.Commit();
 
         FieldSpec fs("addr", FieldType::STRING, true);
-        size_t modified = 0;
-        UT_EXPECT_TRUE(db.AlterEdgeLabelAddFields("Relation", {fs}, {FieldData()}, &modified));
-        UT_EXPECT_EQ(modified, check.size());
+        UT_EXPECT_TRUE(db.AlterEdgeLabelAddFields("Relation", {fs}, {FieldData()}));
         txn = db.CreateReadTxn();
         for (auto& item : check) {
             auto eiter = txn.GetOutEdgeIterator(item.first);
@@ -92,9 +90,7 @@ TEST_F(TestAlterDetachedLabel, edge_add_field) {
         txn.Abort();
     }
     // check re-open
-    {
-        Galaxy galaxy_tmp(path);
-    }
+    { Galaxy galaxy_tmp(path); }
 }
 
 TEST_F(TestAlterDetachedLabel, edge_del_field) {
@@ -138,9 +134,7 @@ TEST_F(TestAlterDetachedLabel, edge_del_field) {
             check.emplace_back(euid, i);
         }
         txn.Commit();
-        size_t modified = 0;
-        UT_EXPECT_TRUE(db.AlterEdgeLabelDelFields("Relation", {"int64", "str"}, &modified));
-        UT_EXPECT_EQ(modified, check.size());
+        UT_EXPECT_TRUE(db.AlterEdgeLabelDelFields("Relation", {"int64", "str"}));
         txn = db.CreateReadTxn();
         for (auto& item : check) {
             auto eiter = txn.GetOutEdgeIterator(item.first);
@@ -151,9 +145,7 @@ TEST_F(TestAlterDetachedLabel, edge_del_field) {
         txn.Abort();
     }
     // check re-open
-    {
-        Galaxy galaxy_tmp(path);
-    }
+    { Galaxy galaxy_tmp(path); }
 }
 
 TEST_F(TestAlterDetachedLabel, edge_mod_field) {
@@ -197,10 +189,8 @@ TEST_F(TestAlterDetachedLabel, edge_mod_field) {
             check.emplace_back(euid, i);
         }
         txn.Commit();
-        size_t modified = 0;
         std::vector<FieldSpec> mod{FieldSpec("int64", FieldType::INT32, true)};
-        UT_EXPECT_TRUE(db.AlterEdgeLabelModFields("Relation", mod, &modified));
-        UT_EXPECT_EQ(modified, check.size());
+        UT_EXPECT_TRUE(db.AlterEdgeLabelModFields("Relation", mod));
         txn = db.CreateReadTxn();
         for (auto& item : check) {
             auto eiter = txn.GetOutEdgeIterator(item.first);
@@ -212,9 +202,7 @@ TEST_F(TestAlterDetachedLabel, edge_mod_field) {
         txn.Abort();
     }
     // check re-open
-    {
-        Galaxy galaxy_tmp(path);
-    }
+    { Galaxy galaxy_tmp(path); }
 }
 
 TEST_F(TestAlterDetachedLabel, vertex_add_field) {
@@ -248,9 +236,7 @@ TEST_F(TestAlterDetachedLabel, vertex_add_field) {
         }
         txn.Commit();
         FieldSpec fs("addr", FieldType::STRING, true);
-        size_t modified = 0;
-        UT_EXPECT_TRUE(db.AlterVertexLabelAddFields("Person", {fs}, {FieldData()}, &modified));
-        UT_EXPECT_EQ(modified, count);
+        UT_EXPECT_TRUE(db.AlterVertexLabelAddFields("Person", {fs}, {FieldData()}));
         txn = db.CreateReadTxn();
         for (auto& item : check) {
             auto viter = txn.GetVertexIterator(item.first);
@@ -277,9 +263,7 @@ TEST_F(TestAlterDetachedLabel, vertex_add_field) {
         txn.Abort();
     }
     // check re-open
-    {
-        Galaxy galaxy_tmp(path);
-    }
+    { Galaxy galaxy_tmp(path); }
 }
 
 TEST_F(TestAlterDetachedLabel, vertex_delete_field) {
@@ -311,9 +295,7 @@ TEST_F(TestAlterDetachedLabel, vertex_delete_field) {
             check.emplace_back(vid1, i);
         }
         txn.Commit();
-        size_t modified = 0;
-        UT_EXPECT_TRUE(db.AlterVertexLabelDelFields("Person", {"int64", "str"}, &modified));
-        UT_EXPECT_EQ(modified, count);
+        UT_EXPECT_TRUE(db.AlterVertexLabelDelFields("Person", {"int64", "str"}));
         txn = db.CreateReadTxn();
         for (auto& item : check) {
             auto viter = txn.GetVertexIterator(item.first);
@@ -324,9 +306,7 @@ TEST_F(TestAlterDetachedLabel, vertex_delete_field) {
         txn.Abort();
     }
     // check re-open
-    {
-        Galaxy galaxy_tmp(path);
-    }
+    { Galaxy galaxy_tmp(path); }
 }
 
 TEST_F(TestAlterDetachedLabel, vertex_mod_field) {
@@ -358,10 +338,8 @@ TEST_F(TestAlterDetachedLabel, vertex_mod_field) {
             check.emplace_back(vid1, i);
         }
         txn.Commit();
-        size_t modified = 0;
         std::vector<FieldSpec> mod{FieldSpec("int64", FieldType::INT32, true)};
-        UT_EXPECT_TRUE(db.AlterVertexLabelModFields("Person", mod, &modified));
-        UT_EXPECT_EQ(modified, count);
+        UT_EXPECT_TRUE(db.AlterVertexLabelModFields("Person", mod));
         txn = db.CreateReadTxn();
         for (auto& item : check) {
             auto viter = txn.GetVertexIterator(item.first);
@@ -372,7 +350,5 @@ TEST_F(TestAlterDetachedLabel, vertex_mod_field) {
         txn.Abort();
     }
     // check re-open
-    {
-        Galaxy galaxy_tmp(path);
-    }
+    { Galaxy galaxy_tmp(path); }
 }

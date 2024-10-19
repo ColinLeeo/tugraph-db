@@ -154,14 +154,14 @@ class LightningGraph {
                   const LabelOptions& options);
 
     // delete a label
-    bool DelLabel(const std::string& label, bool is_vertex);
+    bool DelLabel(const std::string& label, bool is_vertex, size_t* n_modified);
 
     // alter label
     template <typename GenNewSchema, typename ModifyIndex>
     bool _AlterLabel(bool is_vertex, const std::string& label,
                      const GenNewSchema& modify_schema,  // std::function<Schema(Schema*)>
                      const ModifyIndex& modify_index);
-
+    bool checkTypeSuitable(FieldType type, FieldType type2) const;
     bool AlterLabelModEdgeConstraints(const std::string& label,
                                       const EdgeConstraints& edge_constraints);
     bool AlterLabelDelFields(const std::string& label, const std::vector<std::string>& del_fields,

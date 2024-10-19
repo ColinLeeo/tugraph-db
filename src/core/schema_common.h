@@ -23,15 +23,22 @@ template <typename StreamT>
 struct BinaryReader<StreamT, lgraph::FieldSpec> {
     static size_t Read(StreamT& stream, lgraph::FieldSpec& fs) {
         return BinaryRead(stream, fs.name) + BinaryRead(stream, fs.type) +
-               BinaryRead(stream, fs.optional);
+               BinaryRead(stream, fs.optional) + BinaryRead(stream, fs.deleted) +
+               BinaryRead(stream, fs.id) + BinaryRead(stream, fs.inited_value) +
+               BinaryRead(stream, fs.init_value) + BinaryRead(stream, fs.set_default_value) +
+               BinaryRead(stream, fs.default_value);
+        ;
     }
 };
-
+// need binarywrite fielddata
 template <typename StreamT>
 struct BinaryWriter<StreamT, lgraph::FieldSpec> {
     static size_t Write(StreamT& stream, const lgraph::FieldSpec& fs) {
         return BinaryWrite(stream, fs.name) + BinaryWrite(stream, fs.type) +
-               BinaryWrite(stream, fs.optional);
+               BinaryWrite(stream, fs.optional) + BinaryWrite(stream, fs.deleted) +
+               BinaryWrite(stream, fs.id) + BinaryWrite(stream, fs.inited_value) +
+               BinaryWrite(stream, fs.init_value) + BinaryWrite(stream, fs.set_default_value) +
+               BinaryWrite(stream, fs.default_value);
     }
 };
 }  // namespace fma_common
@@ -45,76 +52,70 @@ inline std::string LimitLengthString(const std::string& str) {
 }
 }  // namespace _detail
 
-using lgraph_api::LgraphException;
 using lgraph_api::ErrorCode;
+using lgraph_api::LgraphException;
 class FieldNotFoundException : public LgraphException {
  public:
     explicit FieldNotFoundException(const std::string& fname)
-        : LgraphException(ErrorCode::FieldNotFound,
-                          "Field [{}] does not exist.", fname) {}
+        : LgraphException(ErrorCode::FieldNotFound, "Field [{}] does not exist.", fname) {}
 
     explicit FieldNotFoundException(size_t fid)
-        : LgraphException(ErrorCode::FieldNotFound,
-                          "Field [#{}] does not exist.", fid) {}
+        : LgraphException(ErrorCode::FieldNotFound, "Field [#{}] does not exist.", fid) {}
 };
 
 class FieldAlreadyExistsException : public LgraphException {
  public:
     explicit FieldAlreadyExistsException(const std::string& fname)
-        : LgraphException(ErrorCode::FieldAlreadyExists,
-                          "Field [{}] defined more than once.", fname) {}
+        : LgraphException(ErrorCode::FieldAlreadyExists, "Field [{}] defined more than once.",
+                          fname) {}
 
     explicit FieldAlreadyExistsException(size_t fid)
-        : LgraphException(ErrorCode::FieldAlreadyExists,
-                          "Field [#{}] defined more than once.", fid) {}
+        : LgraphException(ErrorCode::FieldAlreadyExists, "Field [#{}] defined more than once.",
+                          fid) {}
 };
 
 class FieldIdConflictException : public LgraphException {
  public:
-    explicit FieldIdConflictException(const std::string& fidname1,
-                                        const std::string& fidname2)
-        : LgraphException(ErrorCode::FieldIdConflict,
-                          "Field [#{}] and Field [#P{}] id conflict.",
-                           fidname1, fidname2) {}
+    explicit FieldIdConflictException(const std::string& fidname1, const std::string& fidname2)
+        : LgraphException(ErrorCode::FieldIdConflict, "Field [#{}] and Field [#P{}] id conflict.",
+                          fidname1, fidname2) {}
 };
 
 class FieldCannotBeNullTypeException : public LgraphException {
  public:
     explicit FieldCannotBeNullTypeException(const std::string& fname)
-        : LgraphException(ErrorCode::FieldCannotBeNullType,
-                          "Field [{}] cannot be NUL type.", fname) {}
+        : LgraphException(ErrorCode::FieldCannotBeNullType, "Field [{}] cannot be NUL type.",
+                          fname) {}
 
     explicit FieldCannotBeNullTypeException(size_t fid)
-        : LgraphException(ErrorCode::FieldCannotBeNullType,
-                          "Field [#{}] cannot be NUL type.", fid) {}
+        : LgraphException(ErrorCode::FieldCannotBeNullType, "Field [#{}] cannot be NUL type.",
+                          fid) {}
 };
 
 class FieldCannotBeDeletedException : public LgraphException {
  public:
     explicit FieldCannotBeDeletedException(const std::string& fname)
-        : LgraphException(ErrorCode::FieldCannotBeDeleted,
-                          "Field [{}] cannot be deleted.", fname) {}
+        : LgraphException(ErrorCode::FieldCannotBeDeleted, "Field [{}] cannot be deleted.", fname) {
+    }
 
     explicit FieldCannotBeDeletedException(size_t fid)
-        : LgraphException(ErrorCode::FieldCannotBeDeleted,
-                          "Field [#{}] cannot be deleted.", fid) {}
+        : LgraphException(ErrorCode::FieldCannotBeDeleted, "Field [#{}] cannot be deleted.", fid) {}
 };
 
 class FieldCannotBeSetNullException : public LgraphException {
  public:
     explicit FieldCannotBeSetNullException(const std::string& fname)
-        : LgraphException(ErrorCode::FieldCannotBeSetNull,
-                          "Field [{}] is not optional.", fname) {}
+        : LgraphException(ErrorCode::FieldCannotBeSetNull, "Field [{}] is not optional.", fname) {}
 
     explicit FieldCannotBeSetNullException(size_t fid)
-        : LgraphException(ErrorCode::FieldCannotBeSetNull,
-                          "Field [#{}] is not optional.", fid) {}
+        : LgraphException(ErrorCode::FieldCannotBeSetNull, "Field [#{}] is not optional.", fid) {}
 };
 
 class ParseStringException : public LgraphException {
  public:
     ParseStringException(const std::string& field, const std::string& str, FieldType dst_type)
-        : LgraphException(ErrorCode::ParseStringException,
+        : LgraphException(
+              ErrorCode::ParseStringException,
               "Failed to set field [{}]: Failed to parse string into type [{}], string is:{}",
               field, field_data_helper::TryGetFieldTypeName(dst_type),
               _detail::LimitLengthString(str)) {}
@@ -134,15 +135,15 @@ class ParseFieldDataException : public LgraphException {
     ParseFieldDataException(const std::string& field, const FieldData& in, FieldType dst_type)
         : LgraphException(ErrorCode::ParseFieldDataException,
                           "Failed to set field [{}]: Cannot convert input [{}] into type [{}]",
-                             field, in, field_data_helper::TryGetFieldTypeName(dst_type)) {}
+                          field, in, field_data_helper::TryGetFieldTypeName(dst_type)) {}
 };
 
 class DataSizeTooLargeException : public LgraphException {
  public:
     DataSizeTooLargeException(const std::string& field, size_t dsize, size_t max_size)
         : LgraphException(ErrorCode::DataSizeTooLarge,
-                          "Failed to set field [{}]: Data size too big, max is {}, given {}",
-                          field, max_size, dsize) {}
+                          "Failed to set field [{}]: Data size too big, max is {}, given {}", field,
+                          max_size, dsize) {}
 };
 
 class RecordSizeLimitExceededException : public LgraphException {
@@ -150,26 +151,24 @@ class RecordSizeLimitExceededException : public LgraphException {
     RecordSizeLimitExceededException(const std::string& field, size_t dsize, size_t max_size)
         : LgraphException(
               ErrorCode::RecordSizeLimitExceeded,
-              "Failed to set field [{}]: Record size limit exceeded, max is {}, given {}",
-              field, max_size, dsize) {}
+              "Failed to set field [{}]: Record size limit exceeded, max is {}, given {}", field,
+              max_size, dsize) {}
 };
 
 class LabelNotExistException : public LgraphException {
  public:
     explicit LabelNotExistException(const std::string& lname)
-        : LgraphException(ErrorCode::LabelNotExist,
-                          "Label [{}] does not exist.", lname) {}
+        : LgraphException(ErrorCode::LabelNotExist, "Label [{}] does not exist.", lname) {}
 
     explicit LabelNotExistException(size_t lid)
-        : LgraphException(ErrorCode::LabelNotExist,
-                          "Label [#{}] does not exist.", lid) {}
+        : LgraphException(ErrorCode::LabelNotExist, "Label [#{}] does not exist.", lid) {}
 };
 
 class LabelExistException : public LgraphException {
  public:
     LabelExistException(const std::string& label, bool is_vertex)
-        : LgraphException(ErrorCode::LabelExist,
-                          "{} label [{}] already exists.", is_vertex ? "Vertex" : "Edge", label) {}
+        : LgraphException(ErrorCode::LabelExist, "{} label [{}] already exists.",
+                          is_vertex ? "Vertex" : "Edge", label) {}
 };
 
 class PrimaryIndexCannotBeDeletedException : public LgraphException {
@@ -186,15 +185,15 @@ class PrimaryIndexCannotBeDeletedException : public LgraphException {
 class IndexNotExistException : public LgraphException {
  public:
     IndexNotExistException(const std::string& label, const std::string& field)
-        : LgraphException(ErrorCode::IndexNotExist,
-                          "VertexIndex [{}:{}] does not exist.", label, field) {}
+        : LgraphException(ErrorCode::IndexNotExist, "VertexIndex [{}:{}] does not exist.", label,
+                          field) {}
 };
 
 class IndexExistException : public LgraphException {
  public:
     IndexExistException(const std::string& label, const std::string& field)
-        : LgraphException(ErrorCode::IndexExist,
-                          "VertexIndex [{}:{}] already exist.", label, field) {}
+        : LgraphException(ErrorCode::IndexExist, "VertexIndex [{}:{}] already exist.", label,
+                          field) {}
 };
 
 class FullTextIndexNotExistException : public LgraphException {
@@ -207,8 +206,8 @@ class FullTextIndexNotExistException : public LgraphException {
 class FullTextIndexExistException : public LgraphException {
  public:
     FullTextIndexExistException(const std::string& label, const std::string& field)
-        : LgraphException(ErrorCode::FullTextIndexExist,
-                          "FullText Index [{}:{}] already exist.", label, field) {}
+        : LgraphException(ErrorCode::FullTextIndexExist, "FullText Index [{}:{}] already exist.",
+                          label, field) {}
 };
 
 class VectorSizeTooLargeException : public LgraphException {
@@ -222,36 +221,32 @@ class VectorSizeTooLargeException : public LgraphException {
 class VectorIndexNotExistException : public LgraphException {
  public:
     VectorIndexNotExistException(const std::string& label, const std::string& field)
-        : LgraphException(ErrorCode::IndexNotExist,
-                          "VectorIndex [{}:{}] does not exist.", label, field) {}
+        : LgraphException(ErrorCode::IndexNotExist, "VectorIndex [{}:{}] does not exist.", label,
+                          field) {}
 };
 
 class UserNotExistException : public LgraphException {
  public:
     explicit UserNotExistException(const std::string& user)
-        : LgraphException(ErrorCode::UserNotExist,
-                          "User [{}] does not exist.", user) {}
+        : LgraphException(ErrorCode::UserNotExist, "User [{}] does not exist.", user) {}
 };
 
 class UserExistException : public LgraphException {
  public:
     explicit UserExistException(const std::string& user)
-        : LgraphException(ErrorCode::UserExist,
-                          "User [{}] already exist.", user) {}
+        : LgraphException(ErrorCode::UserExist, "User [{}] already exist.", user) {}
 };
 
 class GraphNotExistException : public LgraphException {
  public:
     explicit GraphNotExistException(const std::string& graph)
-        : LgraphException(ErrorCode::GraphNotExist,
-                          "graph [{}] does not exist.", graph) {}
+        : LgraphException(ErrorCode::GraphNotExist, "graph [{}] does not exist.", graph) {}
 };
 
 class GraphExistException : public LgraphException {
  public:
     explicit GraphExistException(const std::string& graph)
-        : LgraphException(ErrorCode::GraphExist,
-                          "graph [{}] already exist.", graph) {}
+        : LgraphException(ErrorCode::GraphExist, "graph [{}] already exist.", graph) {}
 };
 
 class GraphCreateException : public LgraphException {
@@ -264,43 +259,38 @@ class GraphCreateException : public LgraphException {
 class RoleNotExistException : public LgraphException {
  public:
     explicit RoleNotExistException(const std::string& role)
-        : LgraphException(ErrorCode::RoleNotExist,
-                          "role [{}] does not exist.", role) {}
+        : LgraphException(ErrorCode::RoleNotExist, "role [{}] does not exist.", role) {}
 };
 
 class RoleExistException : public LgraphException {
  public:
     explicit RoleExistException(const std::string& role)
-        : LgraphException(ErrorCode::RoleExist,
-                          "role [{}] already exist.", role) {}
+        : LgraphException(ErrorCode::RoleExist, "role [{}] already exist.", role) {}
 };
 
 class PluginNotExistException : public LgraphException {
  public:
     explicit PluginNotExistException(const std::string& plugin)
-        : LgraphException(ErrorCode::PluginNotExist,
-                          "plugin [{}] does not exist.", plugin) {}
+        : LgraphException(ErrorCode::PluginNotExist, "plugin [{}] does not exist.", plugin) {}
 };
 
 class PluginExistException : public LgraphException {
  public:
     explicit PluginExistException(const std::string& plugin)
-        : LgraphException(ErrorCode::PluginExist,
-                          "plugin [{}] already exist.", plugin) {}
+        : LgraphException(ErrorCode::PluginExist, "plugin [{}] already exist.", plugin) {}
 };
 
 class TaskNotExistException : public LgraphException {
  public:
     explicit TaskNotExistException(const std::string& task_id)
-        : LgraphException(ErrorCode::TaskNotExist,
-              FMA_FMT("Task [{}] not exist.", task_id)) {}
+        : LgraphException(ErrorCode::TaskNotExist, FMA_FMT("Task [{}] not exist.", task_id)) {}
 };
 
 class TaskKilledFailedException : public LgraphException {
  public:
     explicit TaskKilledFailedException(const std::string& task_id)
-        : LgraphException(ErrorCode::TaskKilledFailed,
-                          "Task [{}]  did not respond to kill signal.", task_id) {}
+        : LgraphException(ErrorCode::TaskKilledFailed, "Task [{}]  did not respond to kill signal.",
+                          task_id) {}
 };
 
 }  // namespace lgraph

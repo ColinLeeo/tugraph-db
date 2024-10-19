@@ -100,7 +100,6 @@ struct lgraph_api_graph_db_t {
 struct lgraph_api_galaxy_t {
     Galaxy repr;
 };
-
 }
 
 /* DateTime(not exhausted)*/
@@ -265,7 +264,7 @@ lgraph_api_field_spec_t* lgraph_api_create_field_spec() {
 }
 lgraph_api_field_spec_t* lgraph_api_create_field_spec_name_type_optional(const char* name, int type,
                                                                          bool optional) {
-                                                                            // need fix
+    // need fix
     return new lgraph_api_field_spec_t{FieldSpec(name, static_cast<FieldType>(type), optional, 0)};
 }
 void lgraph_api_field_spec_destroy(lgraph_api_field_spec_t* fs) { delete fs; }
@@ -2109,9 +2108,9 @@ bool lgraph_api_graph_db_add_vertex_label(lgraph_api_graph_db_t* graphdb, const 
                                           const lgraph_api_field_spec_t* const* fds, size_t fds_len,
                                           const char* primary_field, char** errptr) {
     try {
-        graphdb->repr.AddVertexLabel(
-            label, lgraph_api_field_spec_array_to_feild_spec_vec(fds, fds_len),
-            VertexOptions(primary_field));
+        graphdb->repr.AddVertexLabel(label,
+                                     lgraph_api_field_spec_array_to_feild_spec_vec(fds, fds_len),
+                                     VertexOptions(primary_field));
         return true;
     } catch (const std::exception& e) {
         *errptr = strdup(e.what());
@@ -2149,12 +2148,11 @@ bool lgraph_api_graph_db_alter_vertex_label_add_fields(
     lgraph_api_graph_db_t* graphdb, const char* label,
     const lgraph_api_field_spec_t* const* add_fields, size_t add_fields_len,
     const lgraph_api_field_data_t* const* default_values, size_t default_values_len,
-    size_t* n_modified, char** errptr) {
+    char** errptr) {
     try {
         return graphdb->repr.AlterVertexLabelAddFields(
             label, lgraph_api_field_spec_array_to_feild_spec_vec(add_fields, add_fields_len),
-            lgraph_api_field_data_array_to_field_data_vec(default_values, default_values_len),
-            n_modified);
+            lgraph_api_field_data_array_to_field_data_vec(default_values, default_values_len));
     } catch (const std::exception& e) {
         *errptr = strdup(e.what());
         return false;
@@ -2167,8 +2165,7 @@ bool lgraph_api_graph_db_alter_vertex_label_mod_fields(
     char** errptr) {
     try {
         *n_modified = graphdb->repr.AlterVertexLabelModFields(
-            label, lgraph_api_field_spec_array_to_feild_spec_vec(mod_fields, mod_fields_len),
-            n_modified);
+            label, lgraph_api_field_spec_array_to_feild_spec_vec(mod_fields, mod_fields_len));
         return true;
     } catch (const std::exception& e) {
         *errptr = strdup(e.what());
@@ -2190,9 +2187,8 @@ bool lgraph_api_graph_db_add_edge_label(lgraph_api_graph_db_t* graphdb, const ch
         EdgeOptions options;
         options.temporal_field = temporal_field;
         options.edge_constraints = constraints;
-        graphdb->repr.AddEdgeLabel(label,
-                                   lgraph_api_field_spec_array_to_feild_spec_vec(fds, fds_len),
-                                   options);
+        graphdb->repr.AddEdgeLabel(
+            label, lgraph_api_field_spec_array_to_feild_spec_vec(fds, fds_len), options);
         return true;
     } catch (const std::exception& e) {
         *errptr = strdup(e.what());
@@ -2229,11 +2225,10 @@ bool lgraph_api_graph_db_alter_label_mod_edge_constraints(
 bool lgraph_api_graph_db_alter_edge_label_del_fields(lgraph_api_graph_db_t* graphdb,
                                                      const char* label,
                                                      const char* const* del_fields,
-                                                     size_t del_fields_len, size_t* n_modified,
-                                                     char** errptr) {
+                                                     size_t del_fields_len, char** errptr) {
     try {
         std::vector<std::string> fields(del_fields, del_fields + del_fields_len);
-        return graphdb->repr.AlterEdgeLabelDelFields(label, fields, n_modified);
+        return graphdb->repr.AlterEdgeLabelDelFields(label, fields);
     } catch (const std::exception& e) {
         *errptr = strdup(e.what());
         return false;
@@ -2248,8 +2243,7 @@ bool lgraph_api_graph_db_alter_edge_label_add_fields(
     try {
         return graphdb->repr.AlterEdgeLabelAddFields(
             label, lgraph_api_field_spec_array_to_feild_spec_vec(add_fields, add_fields_len),
-            lgraph_api_field_data_array_to_field_data_vec(default_values, default_values_len),
-            n_modified);
+            lgraph_api_field_data_array_to_field_data_vec(default_values, default_values_len));
     } catch (const std::exception& e) {
         *errptr = strdup(e.what());
         return false;
@@ -2262,8 +2256,7 @@ bool lgraph_api_graph_db_alter_edge_label_mod_fields(
     char** errptr) {
     try {
         return graphdb->repr.AlterEdgeLabelModFields(
-            label, lgraph_api_field_spec_array_to_feild_spec_vec(mod_fields, mod_fields_len),
-            n_modified);
+            label, lgraph_api_field_spec_array_to_feild_spec_vec(mod_fields, mod_fields_len));
     } catch (const std::exception& e) {
         *errptr = strdup(e.what());
         return false;
@@ -2271,8 +2264,7 @@ bool lgraph_api_graph_db_alter_edge_label_mod_fields(
 }
 
 bool lgraph_api_graph_db_add_vertex_index(lgraph_api_graph_db_t* graphdb, const char* label,
-                                          const char* field, int type,
-                                          char** errptr) {
+                                          const char* field, int type, char** errptr) {
     try {
         graphdb->repr.AddVertexIndex(label, field, static_cast<IndexType>(type));
         return true;
@@ -2283,8 +2275,7 @@ bool lgraph_api_graph_db_add_vertex_index(lgraph_api_graph_db_t* graphdb, const 
 }
 
 bool lgraph_api_graph_db_add_edge_index(lgraph_api_graph_db_t* graphdb, const char* label,
-                                        const char* field, int type,
-                                        char** errptr) {
+                                        const char* field, int type, char** errptr) {
     try {
         graphdb->repr.AddEdgeIndex(label, field, static_cast<IndexType>(type));
         return true;

@@ -214,7 +214,7 @@ class GraphDB {
      * @returns True if it succeeds, false if the label already exists.
      */
     bool AddVertexLabel(const std::string &label, const std::vector<FieldSpec> &fds,
-                        const VertexOptions& options);
+                        const VertexOptions &options);
 
     /**
      * @brief   Deletes a vertex label and all the vertices with this label.
@@ -247,8 +247,7 @@ class GraphDB {
      * @returns True if it succeeds, false if the label does not exist.
      */
     bool AlterVertexLabelDelFields(const std::string &label,
-                                   const std::vector<std::string> &del_fields,
-                                   size_t *n_modified = nullptr);
+                                   const std::vector<std::string> &del_fields);
 
     /**
      * @brief   Add fields to a vertex label. The new fields in existing vertices will be filled
@@ -269,8 +268,7 @@ class GraphDB {
      */
     bool AlterVertexLabelAddFields(const std::string &label,
                                    const std::vector<FieldSpec> &add_fields,
-                                   const std::vector<FieldData> &default_values,
-                                   size_t *n_modified = nullptr);
+                                   const std::vector<FieldData> &default_values);
 
     /**
      * @brief   Modify fields in a vertex label, either chage the data type or optional, or both.
@@ -288,8 +286,7 @@ class GraphDB {
      * @returns True if it succeeds, false if the label does not exist.
      */
     bool AlterVertexLabelModFields(const std::string &label,
-                                   const std::vector<FieldSpec> &mod_fields,
-                                   size_t *n_modified = nullptr);
+                                   const std::vector<FieldSpec> &mod_fields);
 
     /**
      * @brief   Add a edge label, specifying its schema. It is allowed to specify edge constrains,
@@ -312,9 +309,8 @@ class GraphDB {
      *
      * @returns True if it succeeds, false if label already exists.
      */
-    bool AddEdgeLabel(
-        const std::string &label, const std::vector<FieldSpec> &fds,
-        const EdgeOptions& options);
+    bool AddEdgeLabel(const std::string &label, const std::vector<FieldSpec> &fds,
+                      const EdgeOptions &options);
 
     /**
      * @brief   Deletes an edge label and all the edges of this type.
@@ -364,8 +360,7 @@ class GraphDB {
      * @returns True if it succeeds, false if it fails.
      */
     bool AlterEdgeLabelDelFields(const std::string &label,
-                                 const std::vector<std::string> &del_fields,
-                                 size_t *n_modified = nullptr);
+                                 const std::vector<std::string> &del_fields);
 
     /**
      * @brief   Add fields to an edge label. The new fields in existing edges will be set to
@@ -386,8 +381,7 @@ class GraphDB {
      * @returns True if it succeeds, false if the edge label does not exist.
      */
     bool AlterEdgeLabelAddFields(const std::string &label, const std::vector<FieldSpec> &add_fields,
-                                 const std::vector<FieldData> &default_values,
-                                 size_t *n_modified = nullptr);
+                                 const std::vector<FieldData> &default_values);
 
     /**
      * @brief   Modify fields in an edge label. Data type and OPTIONAL can be modified.
@@ -404,8 +398,8 @@ class GraphDB {
      *
      * @returns True if it succeeds, false if the label does not exist.
      */
-    bool AlterEdgeLabelModFields(const std::string &label, const std::vector<FieldSpec> &mod_fields,
-                                 size_t *n_modified = nullptr);
+    bool AlterEdgeLabelModFields(const std::string &label,
+                                 const std::vector<FieldSpec> &mod_fields);
 
     //********************************
     // VertexIndex related
@@ -447,10 +441,9 @@ class GraphDB {
      */
     bool AddEdgeIndex(const std::string &label, const std::string &field, IndexType type);
 
-    bool AddVertexCompositeIndex(const std::string& label,
-                                 const std::vector<std::string>& fields,
+    bool AddVertexCompositeIndex(const std::string &label, const std::vector<std::string> &fields,
                                  CompositeIndexType type);
-     /**
+    /**
      * @brief   Adds a vector index to 'label:field'. This function blocks until the index is fully
      *          created.
      *
@@ -467,12 +460,12 @@ class GraphDB {
      * @param   vec_dimension   Dimension of the vector
      * @param   distance_type   Type of the distance
      * @param   index_spec      Specification of the index
-     * 
+     *
      * @returns True if it succeeds, false if the index already exists.
      */
-    bool AddVectorIndex(bool is_vertex, const std::string& label, const std::string& field,
-                        const std::string& index_type, int vec_dimension,
-                        const std::string& distance_type, std::vector<int>& index_spec);
+    bool AddVectorIndex(bool is_vertex, const std::string &label, const std::string &field,
+                        const std::string &index_type, int vec_dimension,
+                        const std::string &distance_type, std::vector<int> &index_spec);
 
     /**
      * @brief   Check if this vertex_label:field is indexed.
@@ -500,8 +493,7 @@ class GraphDB {
      */
     bool IsEdgeIndexed(const std::string &label, const std::string &field);
 
-    bool IsVertexCompositeIndexed(const std::string &label,
-                                  const std::vector<std::string> &field);
+    bool IsVertexCompositeIndexed(const std::string &label, const std::vector<std::string> &field);
 
     /**
      * @brief   Deletes the index to 'vertex_label:field'
@@ -518,8 +510,8 @@ class GraphDB {
      */
     bool DeleteVertexIndex(const std::string &label, const std::string &field);
 
-    bool DeleteVertexCompositeIndex(const std::string& label,
-                                    const std::vector<std::string>& fields);
+    bool DeleteVertexCompositeIndex(const std::string &label,
+                                    const std::vector<std::string> &fields);
 
     /**
      * @brief   Deletes the index to 'edge_label:field'
@@ -546,10 +538,10 @@ class GraphDB {
      * @param   is_vertex       vertex or edge.
      * @param   label           The label.
      * @param   field           The field.
-     * 
+     *
      * @returns True if it succeeds, false if the index does not exists.
      */
-    bool DeleteVectorIndex(bool is_vertex, const std::string& label, const std::string& field);
+    bool DeleteVectorIndex(bool is_vertex, const std::string &label, const std::string &field);
 
     /**
      * @brief   Get graph description
