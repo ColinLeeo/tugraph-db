@@ -29,8 +29,7 @@
 
 #include "fma-common/type_traits.h"
 #include "fma-common/utils.h"
-
-#include <lgraph/lgraph_types.h>
+#include "lgraph/lgraph_types.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4800)  // disable warning C4800: force value to bool
@@ -489,6 +488,7 @@ class BinaryReaderForFieldData {
         return read_size;
     }
 };
+
 // \endcond 0    Enable doxygen
 
 /*!
@@ -636,12 +636,14 @@ class BinaryWriterForNonSequentialContainer {
 
 template <typename StreamT>
 class BinaryReader<StreamT, ::lgraph_api::FieldData> : public BinaryReaderForFieldData<StreamT> {};
+
 template <typename StreamT>
 class BinaryWriter<StreamT, ::lgraph_api::FieldData> : public BinaryWriterForFieldData<StreamT> {};
 
 template <typename StreamT>
 class BinaryReader<StreamT, std::string>
     : public BinaryReaderForSequentialContainer<StreamT, std::string, char> {};
+
 template <typename StreamT>
 class BinaryWriter<StreamT, std::string>
     : public BinaryWriterForSequentialContainer<StreamT, std::string, char> {};
@@ -649,6 +651,7 @@ class BinaryWriter<StreamT, std::string>
 template <typename StreamT, typename T>
 class BinaryReader<StreamT, std::vector<T>>
     : public BinaryReaderForSequentialContainer<StreamT, std::vector<T>, T> {};
+
 template <typename StreamT, typename T>
 class BinaryWriter<StreamT, std::vector<T>>
     : public BinaryWriterForSequentialContainer<StreamT, std::vector<T>, T> {};
@@ -657,6 +660,7 @@ template <typename StreamT, typename K, typename V, typename Compare, typename A
 class BinaryReader<StreamT, std::map<K, V, Compare, Allocator>>
     : public BinaryReaderForNonSequentialContainer<StreamT, std::map<K, V, Compare, Allocator>,
                                                    std::pair<K, V>> {};
+
 template <typename StreamT, typename K, typename V, typename Compare, typename Allocator>
 class BinaryWriter<StreamT, std::map<K, V, Compare, Allocator>>
     : public BinaryWriterForNonSequentialContainer<StreamT, std::map<K, V, Compare, Allocator>,
@@ -665,6 +669,7 @@ class BinaryWriter<StreamT, std::map<K, V, Compare, Allocator>>
 template <typename StreamT, typename T, typename Compare, typename Allocator>
 class BinaryReader<StreamT, std::set<T, Compare, Allocator>>
     : public BinaryReaderForNonSequentialContainer<StreamT, std::set<T, Compare, Allocator>, T> {};
+
 template <typename StreamT, typename T, typename Compare, typename Allocator>
 class BinaryWriter<StreamT, std::set<T, Compare, Allocator>>
     : public BinaryWriterForNonSequentialContainer<StreamT, std::set<T, Compare, Allocator>, T> {};
@@ -673,6 +678,7 @@ template <typename StreamT, typename K, typename V, typename Hash, typename Equa
 class BinaryReader<StreamT, std::unordered_map<K, V, Hash, Equal, Alloc>>
     : public BinaryReaderForNonSequentialContainer<
           StreamT, std::unordered_map<K, V, Hash, Equal, Alloc>, std::pair<K, V>> {};
+
 template <typename StreamT, typename K, typename V, typename Hash, typename Equal, typename Alloc>
 class BinaryWriter<StreamT, std::unordered_map<K, V, Hash, Equal, Alloc>>
     : public BinaryWriterForNonSequentialContainer<
@@ -682,6 +688,7 @@ template <typename StreamT, typename T, typename Hash, typename Equal, typename 
 class BinaryReader<StreamT, std::unordered_set<T, Hash, Equal, Alloc>>
     : public BinaryReaderForNonSequentialContainer<StreamT,
                                                    std::unordered_set<T, Hash, Equal, Alloc>, T> {};
+
 template <typename StreamT, typename T, typename Hash, typename Equal, typename Alloc>
 class BinaryWriter<StreamT, std::unordered_set<T, Hash, Equal, Alloc>>
     : public BinaryWriterForNonSequentialContainer<StreamT,
