@@ -698,7 +698,7 @@ void register_python_api(pybind11::module& m) {
             "AlterVertexLabelDelFields",
             [](GraphDB& db, const std::string& label, const std::vector<std::string>& del_fields) {
                 size_t n;
-                if (db.AlterVertexLabelDelFields(label, del_fields, &n)) return n;
+                if (db.AlterVertexLabelDelFields(label, del_fields)) return n;
                 THROW_CODE(InputError, "No such label.");
             },
             "Delete fields from a vertex label\n"
@@ -710,8 +710,7 @@ void register_python_api(pybind11::module& m) {
             "AlterVertexLabelAddFields",
             [](GraphDB& db, const std::string& label, const std::vector<FieldSpec>& add_fields,
                const std::vector<FieldData>& default_values) {
-                size_t n;
-                if (db.AlterVertexLabelAddFields(label, add_fields, default_values, &n)) return n;
+                if (db.AlterVertexLabelAddFields(label, add_fields, default_values)) return true;
                 THROW_CODE(InputError, "No such label.");
             },
             "Add fields to a vertex label\n"
@@ -723,8 +722,7 @@ void register_python_api(pybind11::module& m) {
         .def(
             "AlterVertexLabelModFields",
             [](GraphDB& db, const std::string& label, const std::vector<FieldSpec>& mod_fields) {
-                size_t n;
-                if (db.AlterVertexLabelModFields(label, mod_fields, &n)) return n;
+                if (db.AlterVertexLabelModFields(label, mod_fields)) return true;
                 THROW_CODE(InputError, "No such label.");
             },
             "Modify fields in a vertex label\n"
@@ -748,8 +746,7 @@ void register_python_api(pybind11::module& m) {
         .def(
             "AlterEdgeLabelDelFields",
             [](GraphDB& db, const std::string& label, const std::vector<std::string>& del_fields) {
-                size_t n;
-                if (db.AlterEdgeLabelDelFields(label, del_fields, &n)) return n;
+                if (db.AlterEdgeLabelDelFields(label, del_fields)) return true;
                 THROW_CODE(InputError, "No such label.");
             },
             "Delete fields from an edge label\n"
@@ -761,8 +758,7 @@ void register_python_api(pybind11::module& m) {
             "AlterEdgeLabelAddFields",
             [](GraphDB& db, const std::string& label, const std::vector<FieldSpec>& add_fields,
                const std::vector<FieldData>& default_values) {
-                size_t n;
-                if (db.AlterEdgeLabelAddFields(label, add_fields, default_values, &n)) return n;
+                if (db.AlterEdgeLabelAddFields(label, add_fields, default_values)) return true;
                 THROW_CODE(InputError, "No such label.");
             },
             "Add fields to an edge label\n"
@@ -774,8 +770,7 @@ void register_python_api(pybind11::module& m) {
         .def(
             "AlterEdgeLabelModFields",
             [](GraphDB& db, const std::string& label, const std::vector<FieldSpec>& mod_fields) {
-                size_t n;
-                if (db.AlterEdgeLabelModFields(label, mod_fields, &n)) return n;
+                if (db.AlterEdgeLabelModFields(label, mod_fields)) return true;
                 THROW_CODE(InputError, "No such label.");
             },
             "Modify fields in an edge label\n"
