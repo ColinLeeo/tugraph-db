@@ -271,7 +271,8 @@ TEST_F(TestSchema, ParseAndSetStringBlob) {
 // TEST_F(TestSchema, TestParseAndSetBase) {
 //     std::vector<FieldSpec> field_vec;
 //     for (int i = 1; i <= 16; i++) {
-//         field_vec.push_back(FieldSpec(lgraph_api::to_string((FieldType)i), (FieldType)i, false, i));
+//         field_vec.push_back(FieldSpec(lgraph_api::to_string((FieldType)i), (FieldType)i, false,
+//         i));
 //     }
 //     Schema schema(true);
 //     schema.SetSchema(true, field_vec, "INT64", "", {}, {});

@@ -27,7 +27,6 @@ struct BinaryReader<StreamT, lgraph::FieldSpec> {
                BinaryRead(stream, fs.id) + BinaryRead(stream, fs.inited_value) +
                BinaryRead(stream, fs.init_value) + BinaryRead(stream, fs.set_default_value) +
                BinaryRead(stream, fs.default_value);
-        ;
     }
 };
 // need binarywrite fielddata
