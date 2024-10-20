@@ -30,7 +30,7 @@
 class TestCppPlugin : public TuGraphTest {};
 
 class PluginTester : public lgraph::SingleLanguagePluginManager {
-    friend class TestCppPlugin_CppPlugin_Test;
+    friend class TestCppPlugin_DISABLED_CppPlugin_Test;
 
  public:
     PluginTester(lgraph::LightningGraph* db, const std::string& d, const std::string& t)
@@ -42,7 +42,7 @@ class PluginTester : public lgraph::SingleLanguagePluginManager {
 };
 
 class CppPluginImplTester : public lgraph::CppPluginManagerImpl {
-    friend class TestCppPlugin_CppPlugin_Test;
+    friend class TestCppPlugin_DISABLED_CppPlugin_Test;
 };
 
 void build_so() {
