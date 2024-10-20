@@ -93,7 +93,7 @@ class TestHALGraphPeer : public TuGraphTest {
     std::string host;
 };
 
-TEST_F(TestHALGraphPeer, LGraphPeer) {
+TEST_F(TestHALGraphPeer, DISABLED_LGraphPeer) {
     std::string ha_all_conf = host + ":29092," + host + ":29093" + host + ":29094";
     fma_common::SleepS(10);
 

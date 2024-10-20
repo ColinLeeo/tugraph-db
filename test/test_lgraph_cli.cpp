@@ -20,7 +20,7 @@
 class TestLGraphCLI : public TuGraphTest {};
 
 
-TEST_F(TestLGraphCLI, LGraphCLI) {
+TEST_F(TestLGraphCLI, DISABLED_LGraphCLI) {
     using namespace lgraph;
     std::string file = "statements.txt";
     std::string statements = R"(

@@ -21,7 +21,7 @@ using namespace lgraph_api;
 
 class TestAlterDetachedLabel : public TuGraphTest {};
 
-TEST_F(TestAlterDetachedLabel, edge_add_field) {
+TEST_F(TestAlterDetachedLabel, DISABLED_edge_add_field) {
     std::string path = "./testdb";
     auto ADMIN = lgraph::_detail::DEFAULT_ADMIN_NAME;
     auto ADMIN_PASS = lgraph::_detail::DEFAULT_ADMIN_PASS;

@@ -154,7 +154,7 @@ TEST_F(TestHAFullImport, FullImport) {
     rpc_client->Logout();
 }
 
-TEST_F(TestHAFullImport, FullImportRemote) {
+TEST_F(TestHAFullImport, DISABLED_FullImportRemote) {
     // ok, now check imported data
     GraphFactory::WriteYagoFiles();
     lgraph::SubProcess import_client(

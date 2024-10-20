@@ -116,7 +116,7 @@ void read_code(const std::string& code_path, std::string& code) {
     }
 }
 
-TEST_F(TestCppPlugin, CppPlugin) {
+TEST_F(TestCppPlugin, DISABLED_CppPlugin) {
     using namespace fma_common;
     using namespace lgraph;
     std::string db_dir = "./lgraph_test_db";

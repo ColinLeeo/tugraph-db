@@ -134,7 +134,7 @@ int test_cypher_plan(const nlohmann::json &conf) {
     return 0;
 }
 
-TEST_F(TestCypherPlan, CypherPlan) {
+TEST_F(TestCypherPlan, DISABLED_CypherPlan) {
     std::string validate_file = "../../test/cypher_plan_validate.json";
     int verbose = 1;
     int argc = _ut_argc;

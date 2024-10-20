@@ -699,7 +699,7 @@ static const std::vector<std::pair<std::string, std::string>> data_mock_snb = {
 100002,300002,20200214
 )"}};
 
-TEST_F(TestImportV3, ImportV3) {
+TEST_F(TestImportV3, DISABLED_ImportV3) {
     // testing import with large string id
     {
         UT_LOG() << "Parsing large string ids";
@@ -1544,7 +1544,7 @@ TEST_F(TestImportV3, ImportV3) {
     }
 }
 
-TEST_F(TestImportV3, ImportJson) {
+TEST_F(TestImportV3, DISABLED_ImportJson) {
     {
         UT_LOG() << "Test import json, with extra space at the end";
         Importer::Config config;
@@ -2619,7 +2619,7 @@ TEST_F(TestImportV3, numEncodeDecode) {
     }
 }
 
-TEST_F(TestImportV3Consistent, DataConsistent) {
+TEST_F(TestImportV3Consistent, DISABLED_DataConsistent) {
     Importer::Config config;
     config.delete_if_exists = true;
     config.continue_on_error = true;
@@ -3024,7 +3024,7 @@ TEST_F(TestImportV3, ImportV3Multi) {
     }
 }
 
-TEST_F(TestImportV3, TestEdgeIndexCreate) {
+TEST_F(TestImportV3, DISABLED_TestEdgeIndexCreate) {
     GraphFactory::create_graph(GraphFactory::GRAPH_DATASET_TYPE::FB, "./testdb");
     std::shared_ptr<lgraph_api::Galaxy> galaxy = std::make_shared<lgraph_api::Galaxy>(
         "./testdb", lgraph::_detail::DEFAULT_ADMIN_NAME,

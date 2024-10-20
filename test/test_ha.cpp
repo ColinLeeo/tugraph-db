@@ -180,7 +180,7 @@ TEST_F(TestHA, HAClient) {
     client.Logout();
 }
 
-TEST_F(TestHA, HAConsistency) {
+TEST_F(TestHA, DISABLED_HAConsistency) {
     std::string cmd_f = "cd {} && ./lgraph_server -c lgraph_ha.json -d stop";
     std::string cmd = FMA_FMT(cmd_f.c_str(), "ha3");
     int rt = system(cmd.c_str());

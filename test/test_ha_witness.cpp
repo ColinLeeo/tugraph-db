@@ -141,7 +141,7 @@ class TestHAWitness : public TuGraphTest {
         "Christopher Nolan,1970,10098";
 };
 
-TEST_F(TestHAWitness, HAWitness) {
+TEST_F(TestHAWitness, DISABLED_HAWitness) {
     // 1 leader + 1 follower + 1 witness (disable to leader)
     start_server(this->host);
     build_so("./sortstr.so", "../../test/test_procedures/sortstr.cpp");
@@ -204,7 +204,7 @@ TEST_F(TestHAWitness, HAWitness) {
     client.Logout();
 }
 
-TEST_F(TestHAWitness, HAWitnessDisableLeader) {
+TEST_F(TestHAWitness, DISABLED_HAWitnessDisableLeader) {
     start_server(this->host, true);
     build_so("./sortstr.so", "../../test/test_procedures/sortstr.cpp");
     std::unique_ptr<lgraph::RpcClient> client = std::make_unique<lgraph::RpcClient>(

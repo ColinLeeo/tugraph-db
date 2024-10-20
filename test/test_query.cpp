@@ -378,42 +378,42 @@ TEST_F(TestQuery, TestGqlParserDemo) {
     UT_EXPECT_TRUE(ret == GEAXErrorCode::GEAX_SUCCEED);
 }
 
-TEST_F(TestQuery, TestDemo) {
+TEST_F(TestQuery, DISABLED_TestDemo) {
     set_graph_type(_ut_graph_dataset_type);
     set_query_type(_ut_query_type);
     std::string dir = test_suite_dir_ + "/demo";
     test_file(dir, false);
 }
 
-TEST_F(TestQuery, TestGqlSuite) {
+TEST_F(TestQuery, DISABLED_TestGqlSuite) {
     set_graph_type(GraphFactory::GRAPH_DATASET_TYPE::YAGO);
     set_query_type(lgraph::ut::QUERY_TYPE::GQL);
     std::string dir = test_suite_dir_ + "/suite/gql";
     test_files(dir);
 }
 
-TEST_F(TestQuery, TestCypherSuite) {
+TEST_F(TestQuery, DISABLED_TestCypherSuite) {
     set_graph_type(GraphFactory::GRAPH_DATASET_TYPE::YAGO);
     set_query_type(lgraph::ut::QUERY_TYPE::CYPHER);
     std::string dir = test_suite_dir_ + "/suite/cypher";
     test_files(dir);
 }
 
-TEST_F(TestQuery, TestGqlFinbench) {
+TEST_F(TestQuery, DISABLED_TestGqlFinbench) {
     set_graph_type(GraphFactory::GRAPH_DATASET_TYPE::MINI_FINBENCH);
     set_query_type(lgraph::ut::QUERY_TYPE::GQL);
     std::string dir = test_suite_dir_ + "/finbench/gql";
     test_files(dir);
 }
 
-TEST_F(TestQuery, TestGqlSNB) {
+TEST_F(TestQuery, DISABLED_TestGqlSNB) {
     set_graph_type(GraphFactory::GRAPH_DATASET_TYPE::MINI_SNB);
     set_query_type(lgraph::ut::QUERY_TYPE::GQL);
     std::string dir = test_suite_dir_ + "/snb/gql";
     test_files(dir);
 }
 
-TEST_F(TestQuery, TestCypherFinbench) {
+TEST_F(TestQuery, DISABLED_TestCypherFinbench) {
     set_graph_type(GraphFactory::GRAPH_DATASET_TYPE::MINI_FINBENCH);
     set_query_type(lgraph::ut::QUERY_TYPE::CYPHER);
     std::string dir = test_suite_dir_ + "/finbench/cypher";

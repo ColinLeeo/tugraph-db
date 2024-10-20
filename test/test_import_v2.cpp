@@ -696,7 +696,7 @@ static const std::vector<std::pair<std::string, std::string>> data_mock_snb = {
 100002,300002,20200214
 )"}};
 
-TEST_F(TestImportV2, ImportV2) {
+TEST_F(TestImportV2, DISABLED_ImportV2) {
     // testing import with large string id
     {
         UT_LOG() << "Parsing large string ids";

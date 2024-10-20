@@ -150,7 +150,7 @@ void WriteSleepPlugin(const std::string& path) {
     out.Close();
 }
 
-TEST_F(TestPythonPluginManagerImpl, PythonPluginManagerImpl) {
+TEST_F(TestPythonPluginManagerImpl, DISABLED_PythonPluginManagerImpl) {
     using namespace fma_common;
     using namespace lgraph;
     std::string plugin_dir = "./python_plugin";

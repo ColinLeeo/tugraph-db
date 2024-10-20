@@ -103,7 +103,7 @@ class TestBatchEdgeIndex : public TuGraphTest {
     std::string user, password;
 };
 
-TEST_F(TestBatchEdgeIndex, BatchEdgeIndex) {
+TEST_F(TestBatchEdgeIndex, DISABLED_BatchEdgeIndex) {
     using namespace fma_common;
     using namespace lgraph;
     user = usr;

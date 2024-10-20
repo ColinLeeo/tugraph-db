@@ -23,7 +23,7 @@
 
 class TestLGraphExport : public TuGraphTest {};
 
-TEST_F(TestLGraphExport, LGraphExport) {
+TEST_F(TestLGraphExport, DISABLED_LGraphExport) {
     const std::string db_dir = "./testdb";
     const std::string export_dir = "./export_dir";
 

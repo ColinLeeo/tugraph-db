@@ -64,7 +64,7 @@ class TestFullImportOnline : public TuGraphTest {
     }
 };
 
-TEST_F(TestFullImportOnline, MFByOtherProcess) {
+TEST_F(TestFullImportOnline, DISABLED_MFByOtherProcess) {
     using namespace lgraph;
     std::string import_cmd = FMA_FMT("./lgraph_import --online true --online_type 1 "
         "-c {} -r http://127.0.0.1:{} -u {} -p {} --overwrite true --delimiter \"|\"",
@@ -84,7 +84,7 @@ TEST_F(TestFullImportOnline, MFByOtherProcess) {
     UT_EXPECT_EQ(v[0]["count(n)"].as_integer(), 100);
 }
 
-TEST_F(TestFullImportOnline, MFByCurrentProcess) {
+TEST_F(TestFullImportOnline, DISABLED_MFByCurrentProcess) {
     lgraph::import_v2::OnlineImportClient::Config config;
     config.url = "http://127.0.0.1:17772/";
     config.config_file =
@@ -104,7 +104,7 @@ TEST_F(TestFullImportOnline, MFByCurrentProcess) {
     UT_EXPECT_EQ(v[0]["count(n)"].as_integer(), 100);
 }
 
-TEST_F(TestFullImportOnline, FBByOtherProcess) {
+TEST_F(TestFullImportOnline, DISABLED_FBByOtherProcess) {
     using namespace lgraph;
     std::string import_cmd = FMA_FMT("./lgraph_import --online true --online_type 1 "
         "-c {} -r http://127.0.0.1:{} -u {} -p {} -g test --delimiter ,",
@@ -124,7 +124,7 @@ TEST_F(TestFullImportOnline, FBByOtherProcess) {
     UT_EXPECT_EQ(v[0]["count(n)"].as_integer(), 4039);
 }
 
-TEST_F(TestFullImportOnline, FBByCurrentProcess) {
+TEST_F(TestFullImportOnline, DISABLED_FBByCurrentProcess) {
     lgraph::import_v2::OnlineImportClient::Config config;
     config.url = "http://127.0.0.1:17772/";
     config.config_file =

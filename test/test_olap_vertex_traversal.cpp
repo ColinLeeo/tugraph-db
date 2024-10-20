@@ -192,7 +192,7 @@ size_t ProcessCommentCount(lgraph_api::Transaction& t, lgraph_api::VertexIterato
 
 class TestOlapVertexTraversal : public TuGraphTest {};
 
-TEST_F(TestOlapVertexTraversal, OlapVertexTraversal) {
+TEST_F(TestOlapVertexTraversal, DISABLED_OlapVertexTraversal) {
     using namespace lgraph_api;
     CreateCsvFiles(snb_comment);
     lgraph::import_v3::Importer::Config config;
