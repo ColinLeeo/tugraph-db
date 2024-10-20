@@ -29,7 +29,12 @@ struct RemoveDirGuard {
     ~RemoveDirGuard() { fma_common::file_system::RemoveDir(dir_); }
 };
 
-#define CHECK_AND_FREESTR(func, res) {auto p = func; ASSERT_STREQ(p, res); free((void*)p);}
+#define CHECK_AND_FREESTR(func, res) \
+    {                                \
+        auto p = func;               \
+        ASSERT_STREQ(p, res);        \
+        free((void*)p);              \
+    }
 
 TEST_F(TestC, LGraphTypes) {
     lgraph_api_date_time_t* dt = lgraph_api_create_date_time();
@@ -243,7 +248,8 @@ TEST_F(TestC, FieldSpec) {
     lgraph_api_field_spec_set_optional(fs, true);
     ASSERT_TRUE(lgraph_api_field_spec_get_optional(fs));
     CHECK_AND_FREESTR(lgraph_api_field_spec_to_string(fs),
-                      "lgraph_api::FieldSpec(name=[hello],type=BOOL),optional=1");
+                      "lgraph_api::FieldSpec(name=[hello],type=BOOL),optional=1,fieldid=0,"
+                      "isDeleted=0,init_value=NUL,default_value=NUL");
 
     lgraph_api_field_spec_t* fs2 =
         lgraph_api_create_field_spec_name_type_optional("hello", lgraph_api_field_type_bool, true);
@@ -661,8 +667,8 @@ TEST_F(TestC, Graph) {
     // create constraints from "Person" to "Person"
     const char* first_constraints[1] = {"Person"};
     const char* second_contraints[1] = {"Person"};
-    ret = lgraph_api_graph_db_add_edge_label(graphdb, "knows", fields2, 1, "",
-                                             first_constraints, second_contraints, 1, &errptr);
+    ret = lgraph_api_graph_db_add_edge_label(graphdb, "knows", fields2, 1, "", first_constraints,
+                                             second_contraints, 1, &errptr);
     ASSERT_EQ(std::string(errptr == nullptr ? "" : errptr), "");
     ASSERT_TRUE(ret);
     lgraph_api_field_spec_destroy(fields2[0]);
@@ -804,7 +810,6 @@ TEST_F(TestC, Graph) {
     // destroy key_start, key_end
     lgraph_api_field_data_destroy(key_start);
     lgraph_api_field_data_destroy(key_end);
-
 
     // query all "knows" edge with "years" >= 30
     key_start = lgraph_api_create_field_data_int8(20);

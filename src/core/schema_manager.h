@@ -46,8 +46,8 @@ class SchemaManager {
      *
      * \return  A kvstore::Table.
      */
-    static std::unique_ptr<KvTable> OpenTable(
-        KvTransaction& txn, KvStore& store, const std::string& name) {
+    static std::unique_ptr<KvTable> OpenTable(KvTransaction& txn, KvStore& store,
+                                              const std::string& name) {
         return store.OpenTable(txn, name, true, ComparatorDesc::DefaultComparator());
     }
 
@@ -148,10 +148,10 @@ class SchemaManager {
                 auto dst_schema = vertex_sm.GetSchema(constraint.second);
                 // If schema is nullptr, means it has been deleted.
                 // In this case, assign an illegal label id.
-                LabelId src = src_schema ? src_schema->GetLabelId()
-                                         : std::numeric_limits<LabelId>::max();
-                LabelId dst = dst_schema ? dst_schema->GetLabelId()
-                                         : std::numeric_limits<LabelId>::max();
+                LabelId src =
+                    src_schema ? src_schema->GetLabelId() : std::numeric_limits<LabelId>::max();
+                LabelId dst =
+                    dst_schema ? dst_schema->GetLabelId() : std::numeric_limits<LabelId>::max();
                 lids[src].insert(dst);
             }
             s.SetEdgeConstraintsLids(std::move(lids));
@@ -200,8 +200,8 @@ class SchemaManager {
             schemas_.emplace_back(label_in_record_);
             ls = &schemas_.back();
             if (schemas_.size() > std::numeric_limits<LabelId>::max()) {
-                THROW_CODE(InternalError,
-                    "Number of labels exceeds limit: {}.\n", std::numeric_limits<LabelId>::max());
+                THROW_CODE(InternalError, "Number of labels exceeds limit: {}.\n",
+                           std::numeric_limits<LabelId>::max());
             }
             ls->SetLabelId((LabelId)(schemas_.size() - 1));
         }
@@ -227,7 +227,7 @@ class SchemaManager {
         BinaryBuffer buf;
         BinaryWrite(buf, *ls);
         bool r = table_->SetValue(txn, Value::ConstRef(ls->GetLabelId()),
-                                 Value(buf.GetBuf(), buf.GetSize()));
+                                  Value(buf.GetBuf(), buf.GetSize()));
         FMA_DBG_ASSERT(r);
         return true;
     }
@@ -258,7 +258,7 @@ class SchemaManager {
         BinaryBuffer buf;
         BinaryWrite(buf, schema);
         bool r = table_->SetValue(txn, Value::ConstRef(schema.GetLabelId()),
-                                 Value(buf.GetBuf(), buf.GetSize()));
+                                  Value(buf.GetBuf(), buf.GetSize()));
         FMA_DBG_ASSERT(r);
         return true;
     }
@@ -266,8 +266,7 @@ class SchemaManager {
     // replace the schema of label with new_schema
     LabelId AlterLabel(KvTransaction& txn, const std::string& label, const Schema& new_schema) {
         auto it = name_to_idx_.find(label);
-        if (it == name_to_idx_.end())
-            THROW_CODE(InputError, "Label [{}] does not exist.", label);
+        if (it == name_to_idx_.end()) THROW_CODE(InputError, "Label [{}] does not exist.", label);
         size_t idx = it->second;
         Schema* news = &schemas_[idx];
         *news = new_schema;
@@ -280,7 +279,7 @@ class SchemaManager {
             BinaryBuffer buf;
             BinaryWrite(buf, *news);
             bool r = table_->SetValue(txn, Value::ConstRef(news->GetLabelId()),
-                                     Value(buf.GetBuf(), buf.GetSize()));
+                                      Value(buf.GetBuf(), buf.GetSize()));
             FMA_DBG_ASSERT(r);
         }
         return news->GetLabelId();
@@ -294,8 +293,9 @@ class SchemaManager {
         return static_cast<LabelId>(it->second);
     }
 
+    // this function only work when label_in_record = true.
     static LabelId GetRecordLabelId(const Value& record) {
-        return ::lgraph::_detail::UnalignedGet<LabelId>(record.Data());
+        return ::lgraph::_detail::UnalignedGet<LabelId>(record.Data() + sizeof(VersionId));
     }
 
     const _detail::FieldExtractor* GetExtractor(const Value& record,
@@ -380,7 +380,7 @@ class SchemaManager {
     std::vector<CompositeIndexSpec> ListVertexCompositeIndexes() const {
         std::vector<CompositeIndexSpec> indexes;
         for (auto& schema : schemas_) {
-            for (auto &spec : schema.GetCompositeIndexSpec()) {
+            for (auto& spec : schema.GetCompositeIndexSpec()) {
                 indexes.push_back(spec);
             }
         }
@@ -408,8 +408,7 @@ class SchemaManager {
     template <typename T>
     std::vector<IndexSpec> ListIndexByLabel(const T& label) const {
         const Schema* schema = GetSchema(label);
-        if (!schema)
-            THROW_CODE(InputError, "Label [{}] does not exist.", label);
+        if (!schema) THROW_CODE(InputError, "Label [{}] does not exist.", label);
         std::vector<IndexSpec> indexes;
         auto fids = schema->GetIndexedFields();
         for (auto& fid : fids) {
@@ -428,8 +427,7 @@ class SchemaManager {
     template <typename T>
     std::vector<IndexSpec> ListEdgeIndexByLabel(const T& label) const {
         const Schema* schema = GetSchema(label);
-        if (!schema)
-            THROW_CODE(InputError, "Label [{}] does not exist.", label);
+        if (!schema) THROW_CODE(InputError, "Label [{}] does not exist.", label);
         std::vector<IndexSpec> indexes;
         auto fids = schema->GetIndexedFields();
         for (auto& fid : fids) {
@@ -446,10 +444,9 @@ class SchemaManager {
     }
 
     std::vector<CompositeIndexSpec> ListVertexCompositeIndexByLabel(
-                                    const std::string &label) const {
+        const std::string& label) const {
         const Schema* schema = GetSchema(label);
-        if (!schema)
-            THROW_CODE(InputError, "Label [{}] does not exist.", label);
+        if (!schema) THROW_CODE(InputError, "Label [{}] does not exist.", label);
         return schema->GetCompositeIndexSpec();
     }
 

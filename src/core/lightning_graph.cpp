@@ -503,6 +503,7 @@ bool LightningGraph::DelLabel(const std::string& label, bool is_vertex, size_t* 
     // assign new schema before commit, so that
     schema_.Assign(new_schema.release());
     store_->Flush();
+    if (n_modified) *n_modified = modified;
     return r;
 }
 
