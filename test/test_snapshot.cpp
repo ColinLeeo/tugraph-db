@@ -26,7 +26,7 @@ class TestSnapshot : public TuGraphTest {};
 
 static lgraph::VertexId AddVertex(lgraph::Transaction& txn, const std::string& name,
                                   const std::string& type) {
-    std::vector<size_t> fids = {1, 0};  // 域为string类型会放在label的最后面
+    std::vector<size_t> fids = {0, 1};  // 域为string类型会放在label的最后面
     std::vector<std::string> values = {name, type};
     return txn.AddVertex((size_t)0, fids, values);
 }
