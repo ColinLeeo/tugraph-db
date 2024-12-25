@@ -1229,9 +1229,6 @@ class OlapBase {
                 }
                 if (ready_handle) {
                     while (true) {
-                        std::cout << "thread id begin to handle" << thread_id
-                                  << "and nums_threads is" << num_threads << " all nums_th is "
-                                  << omp_get_num_threads() << std::endl;
                         size_t vi = __sync_fetch_and_add(&thread_state[thread_id]->curr, 64);
                         if (vi >= thread_state[thread_id]->end) break;
                         if (CheckKillThisTask()) break;
