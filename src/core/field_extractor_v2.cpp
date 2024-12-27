@@ -18,7 +18,7 @@ namespace lgraph {
 namespace _detail {
 
 bool FieldExtractorV2::DataInRecord(const Value& record) const {
-    if (GetFieldId() + 1 > GetRecordCount(record)) {
+    if (GetFieldId() >= GetRecordCount(record)) {
         return false;
     }
     return true;
@@ -73,12 +73,26 @@ size_t FieldExtractorV2::GetDataSize(const Value& record) const {
         // The length is stored at the beginning of the variable-length field data area.
         return ::lgraph::_detail::UnalignedGet<DataOffset>(record.Data() + var_offset);
     } else {
-        int id_offset = 1;
-        while (GetFieldOffset(record, GetFieldId() + id_offset) == 0) {
-            id_offset++;
+        // To obtain the size of the data, we need to get the offset of the next data. However, when
+        // creating a new property, the offset of the deleted data is marked as 0. In this case, we
+        // need to retrieve the offset of the data that comes after the next one.
+        // In a property, there are record count offsets, and the last offset represents
+        // the offset of the end of the fixed-length data for the entire property.
+        // Therefore, we need a loop to check whether the next property has been deleted.
+        // In the worst case, we need to reach the last offset to determine the length of this data.
+        // The last offset should correspond to a fieldid of (count + 1),
+        // as we do not store the offset for field0.
+        FieldId count = GetRecordCount(record);
+        DataOffset data_offset = GetFieldOffset(record, GetFieldId());
+        DataOffset next_data_offset = data_offset;
+        for (int i = GetFieldId() + 1; i <= count + 1; i++) {
+            if (GetFieldOffset(record, i) != 0) {
+                next_data_offset = GetFieldOffset(record, i);
+                break;
+            }
         }
-        return GetFieldOffset(record, GetFieldId() + id_offset) -
-               GetFieldOffset(record, GetFieldId());
+
+        return next_data_offset - data_offset;
     }
 }
 
